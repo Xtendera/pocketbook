@@ -26,39 +26,21 @@ jobs:
         with:
           version: 8.5.1
 
-      - uses: actions/setup-node@v3
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22.x
-          cache: 'pnpm' # You can active this cache when your repo has a lockfile
+          bun-version: latest
 
       - name: Install deps (with cache)
-        run: pnpm install
-
-      - name: Install playwright
-        run: pnpm exec playwright install chromium
-
-      - name: Next.js cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ github.workspace }}/.next/cache
-          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}-nextjs
+        run: bun install
 
       - name: Setup Prisma
-        run: pnpm prebuild
+        run: bun prebuild
 
-      - run: pnpm build
-      - run: pnpm test-e2e
+      - run: bun build
+      - run: bun test:e2e
 
       - name: Check types
-        run: pnpm tsc
-
-      - name: Upload test results
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: test results
-          path: |
-            playwright/test-results
+        run: bun tsc
 
   unit:
     name: 'Unit tests + typecheck'
@@ -85,22 +67,15 @@ jobs:
         with:
           version: 8.5.1
 
-      - uses: actions/setup-node@v3
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22.x
-          cache: 'pnpm' # You can active this cache when your repo has a lockfile
+          bun-version: latest
 
       - name: Install deps (with cache)
-        run: pnpm install
-
-      - name: Next.js cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ github.workspace }}/.next/cache
-          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}-nextjs
-
+        run: bun install
+        
       - name: Setup Prisma
-        run: pnpm prebuild
+        run: bun prebuild
 
-      - run: pnpm test-unit
-      - run: pnpm tsc
+      - run: bun test:unit
+      - run: bun tsc
