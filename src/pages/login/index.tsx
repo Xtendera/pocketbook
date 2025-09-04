@@ -1,6 +1,6 @@
 // import { trpc } from '../utils/trpc';
 import { useState } from 'react';
-import type { NextPageWithLayout } from './_app';
+import type { NextPageWithLayout } from '../_app';
 import { trpc } from '~/utils/trpc';
 // import type { inferProcedureInput } from '@trpc/server';
 // import Link from 'next/link';
