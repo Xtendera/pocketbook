@@ -22,10 +22,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8.5.1
-
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
@@ -34,13 +30,12 @@ jobs:
         run: bun install
 
       - name: Setup Prisma
-        run: bun prebuild
+        run: bun run prebuild
 
-      - run: bun build
-      - run: bun test:e2e
+      - run: bun run build
 
       - name: Check types
-        run: bun tsc
+        run: bun run tsc
 
   unit:
     name: 'Unit tests + typecheck'
@@ -63,19 +58,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8.5.1
-
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
       - name: Install deps (with cache)
         run: bun install
-        
-      - name: Setup Prisma
-        run: bun prebuild
 
-      - run: bun test:unit
-      - run: bun tsc
+      - name: Setup Prisma
+        run: bun run prebuild
+
+      - run: bun run test:unit
+      - run: bun run tsc
