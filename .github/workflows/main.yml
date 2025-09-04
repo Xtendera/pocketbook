@@ -26,8 +26,8 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install deps (with cache)
-        run: bun install
+      - name: Install deps
+        run: bun install -g pnpm && bun install
 
       - name: Setup Prisma
         run: bun run prebuild
@@ -62,8 +62,8 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install deps (with cache)
-        run: bun install
+      - name: Install deps
+        run: bun install -g pnpm && bun install
 
       - name: Setup Prisma
         run: bun run prebuild
