@@ -35,20 +35,20 @@ const IndexPage: NextPageWithLayout = () => {
   //   }
   // }, [postsQuery.data, utils]);
 
-  const [btnText, setBtnText] = useState<string>("LOGIN");
+  const [btnText, setBtnText] = useState<string>('LOGIN');
   const [btnOn, setBtnOn] = useState<boolean>(true);
-  const [user, setUser] = useState<string>("");
-  const [pass, setPass] = useState<string>("");
+  const [user, setUser] = useState<string>('');
+  const [pass, setPass] = useState<string>('');
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBtnOn(false);
-    setBtnText("Cooking...");
+    setBtnText('Cooking...');
     const resp = await utils.client.auth.login.mutate({
       username: user,
       password: pass
     });
     if (!resp) {
-      setBtnText("Something broke :|");
+      setBtnText('Something broke :|');
       setBtnOn(true);
       return;
     }
@@ -57,7 +57,7 @@ const IndexPage: NextPageWithLayout = () => {
       setBtnOn(true);
       return;
     }
-    setBtnText("Done!")
+    setBtnText('Done!')
   }
 
   function userChange(e: React.ChangeEvent<HTMLInputElement>) {

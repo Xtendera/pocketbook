@@ -26,6 +26,7 @@ export default tseslint.config(
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
+      'quotes': ['error', 'single'],
 
       // Consider removing these rule disables for more type safety in your app ✨
       '@typescript-eslint/no-confusing-void-expression': 'off',
