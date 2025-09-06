@@ -2,12 +2,13 @@
 import { useState } from 'react';
 import type { NextPageWithLayout } from '../_app';
 import { trpc } from '~/utils/trpc';
+import { useRouter } from 'next/router';
 // import type { inferProcedureInput } from '@trpc/server';
 // import Link from 'next/link';
 // import { Fragment } from 'react';
 // import type { AppRouter } from '~/server/routers/_app';
 
-const IndexPage: NextPageWithLayout = () => {
+const LoginPage: NextPageWithLayout = () => {
   const utils = trpc.useUtils(); // Gets the tRPC object with all of the remote calls from the server
   // const postsQuery = trpc.post.list.useInfiniteQuery(
   //   {
@@ -35,6 +36,8 @@ const IndexPage: NextPageWithLayout = () => {
   //   }
   // }, [postsQuery.data, utils]);
 
+  const router = useRouter();
+
   const [btnText, setBtnText] = useState<string>('LOGIN');
   const [btnOn, setBtnOn] = useState<boolean>(true);
   const [user, setUser] = useState<string>('');
@@ -57,7 +60,20 @@ const IndexPage: NextPageWithLayout = () => {
       setBtnOn(true);
       return;
     }
-    setBtnText('Done!')
+    if (!resp.token) {
+      setBtnText('Something went wrong!');
+      setBtnOn(true);
+      return;
+    }
+    setBtnText('Done!');
+
+    const week = 24 * 60 * 60 * 1000 * 7;
+    await cookieStore.set({
+      name: 'jwt',
+      value: await resp.token,
+      expires: Date.now() + week
+    });
+    router.push('/');
   }
 
   function userChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -104,7 +120,7 @@ const IndexPage: NextPageWithLayout = () => {
   );
 };
 
-export default IndexPage;
+export default LoginPage;
 
 /**
  * If you want to statically render this page

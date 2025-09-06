@@ -1,133 +1,46 @@
 // import { trpc } from '../utils/trpc';
-import { useState } from 'react';
+import { useRouter } from 'next/router';
 import type { NextPageWithLayout } from './_app';
 import { trpc } from '~/utils/trpc';
-// import type { inferProcedureInput } from '@trpc/server';
-// import Link from 'next/link';
-// import { Fragment } from 'react';
-// import type { AppRouter } from '~/server/routers/_app';
+import Nav from '~/components/Nav';
+import Link from 'next/link';
 
 const IndexPage: NextPageWithLayout = () => {
   const utils = trpc.useUtils(); // Gets the tRPC object with all of the remote calls from the server
-  // const postsQuery = trpc.post.list.useInfiniteQuery(
-  //   {
-  //     limit: 5,
-  //   },
-  //   {
-  //     getNextPageParam(lastPage) {
-  //       return lastPage.nextCursor;
-  //     },
-  //   },
-  // );
-
-  // const addPost = trpc.post.add.useMutation({
-  //   async onSuccess() {
-  //     // refetches posts after a post is added
-  //     await utils.post.list.invalidate();
-  //   },
-  // });
-
-  // prefetch all posts for instant navigation
-  // useEffect(() => {
-  //   const allPosts = postsQuery.data?.pages.flatMap((page) => page.items) ?? [];
-  //   for (const { id } of allPosts) {
-  //     void utils.post.byId.prefetch({ id });
-  //   }
-  // }, [postsQuery.data, utils]);
-
-  const [btnText, setBtnText] = useState<string>('LOGIN');
-  const [btnOn, setBtnOn] = useState<boolean>(true);
-  const [user, setUser] = useState<string>('');
-  const [pass, setPass] = useState<string>('');
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setBtnOn(false);
-    setBtnText('Cooking...');
-    const resp = await utils.client.auth.login.mutate({
-      username: user,
-      password: pass
-    });
-    if (!resp) {
-      setBtnText('Something broke :|');
-      setBtnOn(true);
-      return;
-    }
-    if (resp.err) {
-      setBtnText(resp.err);
-      setBtnOn(true);
-      return;
-    }
-    setBtnText('Done!')
-  }
-
-  function userChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setUser(e.target.value);
-  }
-
-  function passChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setPass(e.target.value);
-  }
-
+  const router = useRouter();
   return (
-    <div className="min-h-screen flex flex-col">
-      <h1 className="text-3xl ml-8 mt-8 font-medium">Pocket Book</h1>
-      <div className="flex-1 flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-6">
-          <h2 className="text-4xl">Login</h2>
-          <form className="flex flex-col space-y-4 w-64" onSubmit={handleSubmit}>
-            <input
-              type="text"
-              name="username"
-              onChange={userChange}
-              id="user_text"
-              placeholder="Username"
-              className="px-3 py-2 bg-pocket-field border border-pocket-blue rounded-xl outline-none focus:outline-none"
-            />
-            <input
-              type="password"
-              name="password"
-              onChange={passChange}
-              id="pass_text"
-              placeholder="Password"
-              className="px-3 py-2 bg-pocket-field border border-pocket-blue rounded-xl outline-none focus:outline-none"
-            />
-            <input
-              type="submit"
-              value={btnText}
-              disabled={!btnOn}
-              className="px-4 py-2 bg-pocket-blue disabled:bg-pocket-disabled disabled:cursor-default text-white rounded-xl cursor-pointer"
-            />
-          </form>
+    <div className="min-w-screen min-h-screen mx-8">
+      <Nav />
+      <div>
+        <h2 className="text-2xl mt-10">Library</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 mt-6">
+            <Link href='/create' className="w-full h-auto transition-all duration-400 border-gray-600 hover:border-gray-400 border-dashed border-4 flex items-center justify-center cursor-pointer group">
+              <div className="transition-all duration-400 fill-gray-600 group-hover:fill-gray-400">
+                {add_circle()}
+              </div>
+            </Link>
+          <img
+            src="/example.jpg"
+            alt="Thumbnail"
+            className="w-full h-auto object-cover transition-all duration-400 rounded-xl hover:rounded-none shadow-md"
+          />
         </div>
       </div>
     </div>
   );
 };
 
-export default IndexPage;
+function add_circle() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      height="32px"
+      viewBox="0 -960 960 960"
+      width="32px"
+    >
+      <path d="M440-280h80v-160h160v-80H520v-160h-80v160H280v80h160v160Zm40 200q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+    </svg>
+  );
+}
 
-/**
- * If you want to statically render this page
- * - Export `appRouter` & `createContext` from [trpc].ts
- * - Make the `opts` object optional on `createContext()`
- *
- * @see https://trpc.io/docs/v11/ssg
- */
-// export const getStaticProps = async (
-//   context: GetStaticPropsContext<{ filter: string }>,
-// ) => {
-//   const ssg = createServerSideHelpers({
-//     router: appRouter,
-//     ctx: await createContext(),
-//   });
-//
-//   await ssg.post.all.fetch();
-//
-//   return {
-//     props: {
-//       trpcState: ssg.dehydrate(),
-//       filter: context.params?.filter ?? 'all',
-//     },
-//     revalidate: 1,
-//   };
-// };
+export default IndexPage;

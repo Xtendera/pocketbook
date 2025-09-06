@@ -1,37 +1,48 @@
-import fs from 'fs'
-import crypto, { createHmac } from 'crypto'
+import { SignJWT, jwtVerify } from 'jose'
+import z from 'zod'
 
-export interface JWTBody {
-    sub: string,
-    user: string,
-    iat: number
-}
+const JWTBodySchema = z.object({
+    sub: z.string(),
+    user: z.string(),
+    iat: z.number()
+});
 
-interface Header {
-    alg: string,
-    typ: string
-}
+type JWTBody = z.infer<typeof JWTBodySchema>;
 
-function getKey(): string {
-    if (fs.existsSync('hmac.key')) {
-        const fileKey = fs.readFileSync('hmac.key', 'utf8');
-        if (fileKey) {
-            return fileKey;
-        } else {
-            throw new Error('Could not read hmac key file!');
-        }
+function getKey(): Uint8Array {
+    const keyString = process.env.JWT_SECRET;
+    if (!keyString) {
+        throw new Error('JWT_SECRET environment variable is required');
     }
-    const hmacKey = crypto.randomBytes(32).toString('hex');
-    fs.writeFileSync('hmac.key', hmacKey);
-    return hmacKey;
+    // Try as UTF-8 string first (matching your original crypto implementation)
+    return new TextEncoder().encode(keyString);
 }
 
-export function generateToken(body: JWTBody): string {
-    const header: Header = {
-        alg: 'HS256',
-        typ: 'JWT'
+export async function generateToken(body: JWTBody): Promise<string> {
+    const secret = getKey();
+    
+    const jwt = await new SignJWT(body)
+        .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+        .setIssuedAt()
+        .sign(secret);
+    
+    return jwt;
+}
+
+export async function extractTokenBody(token: string): Promise<JWTBody | null> {
+    try {
+        const secret = getKey();
+        
+        const { payload } = await jwtVerify(token, secret, {
+            algorithms: ['HS256']
+        });
+        
+        // Validate the payload structure with Zod
+        const validatedData = JWTBodySchema.parse(payload);
+        return validatedData;
+        
+    } catch (error) {
+        console.error('JWT Verification/Validation Error:', error);
+        return null;
     }
-    let token = Buffer.from(JSON.stringify(header), 'utf8').toString('base64url') + '.' + Buffer.from(JSON.stringify(body), 'utf8').toString('base64url');
-    token += '.' + createHmac('sha256', getKey()).update(token).digest('base64url');
-    return token;
 }

@@ -7,7 +7,7 @@ export const DefaultLayout = ({ children }: DefaultLayoutProps) => {
   return (
     <>
       <Head>
-        <title>Prisma Starter</title>
+        <title>Pocket Book</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
