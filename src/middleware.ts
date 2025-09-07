@@ -15,7 +15,6 @@ async function authenticate(token: string): Promise<boolean> {
   return true;
 }
 
-// This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
   let isAuth = false;
   const cookie = request.cookies.get('jwt');
