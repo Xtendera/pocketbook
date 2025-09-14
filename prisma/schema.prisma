@@ -11,13 +11,27 @@ generator client {
 }
 
 model Book {
-  uuid  String @id @default(uuid())
-  title String
+  uuid     String         @id @default(uuid())
+  title    String
+  progress BookProgress[]
 }
 
 model User {
-  uuid         String @id @default(uuid())
-  username     String @unique
+  uuid         String         @id @default(uuid())
+  username     String         @unique
   passwordHash String
   permission   Int
+  bookProgress BookProgress[]
+}
+
+model BookProgress {
+  id       Int    @id @default(autoincrement())
+  userId   String
+  bookUuid String
+  progress Int    @default(0)
+  
+  user User @relation(fields: [userId], references: [uuid], onDelete: Cascade)
+  book Book @relation(fields: [bookUuid], references: [uuid], onDelete: Cascade)
+  
+  @@unique([userId, bookUuid])
 }

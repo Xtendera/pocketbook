@@ -68,5 +68,76 @@ export const booksRouter = router({
             const cover = await getEpubCoverBase64(bookPath);
             return { cover };
         }
+    ),
+    progress: publicProcedure.input(
+      z.object({
+        bookId: z.string(),
+        userId: z.string()
+      })
+    ).query(
+      async ({ input }) => {
+        const progress = await prisma.bookProgress.findUnique({
+          where: {
+            userId_bookUuid: {
+              userId: input.userId,
+              bookUuid: input.bookId
+            }
+          }
+        });
+        
+        return {
+          progress: progress?.progress ?? 0
+        };
+      }
+    ),
+    updateProgress: publicProcedure.input(
+      z.object({
+        bookId: z.string(),
+        userId: z.string(),
+        progress: z.number().min(0)
+      })
+    ).mutation(
+      async ({ input }) => {
+        const progress = await prisma.bookProgress.upsert({
+          where: {
+            userId_bookUuid: {
+              userId: input.userId,
+              bookUuid: input.bookId
+            }
+          },
+          update: {
+            progress: input.progress
+          },
+          create: {
+            userId: input.userId,
+            bookUuid: input.bookId,
+            progress: input.progress
+          }
+        });
+        
+        return { success: true, progress: progress.progress };
+      }
+    ),
+    userProgress: publicProcedure.input(
+      z.object({
+        userId: z.string()
+      })
+    ).query(
+      async ({ input }) => {
+        const progressEntries = await prisma.bookProgress.findMany({
+          where: {
+            userId: input.userId
+          },
+          include: {
+            book: true
+          }
+        });
+        
+        return progressEntries.map(entry => ({
+          bookId: entry.bookUuid,
+          bookTitle: entry.book.title,
+          progress: entry.progress
+        }));
+      }
     )
 });
