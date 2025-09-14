@@ -1,8 +1,8 @@
-import { useRouter } from 'next/router';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { trpc } from '~/utils/trpc';
+import Loading from './Loading';
 
-export const Library: React.FC = () => {
+const BookGrid: React.FC = () => {
   const utils = trpc.useUtils();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -56,71 +56,40 @@ export const Library: React.FC = () => {
     }
   };
 
-  const [books = []] = trpc.books.list.useSuspenseQuery();
-  const [bookCovers, setBookCovers] = useState<Record<string, string | null>>(
-    {},
-  );
+  const [books, query] = trpc.books.list.useSuspenseQuery();
 
-  useEffect(() => {
-    if (books.length === 0) return;
-
-    const fetchCovers = async () => {
-      const coverPromises = books.map(async (book) => {
-        const coverResult = await utils.books.cover.fetch({
-          bookID: book.uuid,
-        });
-        return { uuid: book.uuid, cover: coverResult.cover };
-      });
-
-      const covers = await Promise.all(coverPromises);
-      const coverMap = covers.reduce(
-        (acc, { uuid, cover }) => {
-          acc[uuid] = cover;
-          return acc;
-        },
-        {} as Record<string, string | null>,
-      );
-
-      setBookCovers(coverMap);
-    };
-
-    fetchCovers();
-  }, [books, utils.books.cover]);
   return (
-    <div>
-      <h2 className="text-2xl mt-10">Library</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 mt-6">
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept=".epub,application/epub+zip"
-          onChange={handleFileChange}
-          style={{ display: 'none' }}
-        />
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 mt-6">
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept=".epub,application/epub+zip"
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
+      />
 
+      <div
+        className={`w-full h-auto transition-all duration-400 border-gray-600 hover:border-gray-400 border-dashed border-4 flex items-center justify-center cursor-pointer group ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        onClick={uploading ? undefined : handlePlusClick}
+      >
         <div
-          className={`w-full h-auto transition-all duration-400 border-gray-600 hover:border-gray-400 border-dashed border-4 flex items-center justify-center cursor-pointer group ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
-          onClick={uploading ? undefined : handlePlusClick}
+          className={`transition-all duration-400 fill-gray-600 group-hover:fill-gray-400 ${uploading ? 'animate-spin' : ''}`}
         >
-          <div
-            className={`transition-all duration-400 fill-gray-600 group-hover:fill-gray-400 ${uploading ? 'animate-spin' : ''}`}
-          >
-            {uploading ? loading_circle() : add_circle()}
-          </div>
+          {uploading ? <Loading /> : add_circle()}
         </div>
-        {books.map((item) => {
-          const cover = bookCovers[item.uuid];
-          return (
-            <img
-              key={item.uuid}
-              src={cover || '/example2.jpg'}
-              alt={item.title}
-              className="w-full h-full object-cover transition-all duration-400 rounded-xl hover:rounded-none shadow-md"
-            />
-          );
-        })}
       </div>
+      {books.map((item) => {
+        const cover = item.cover;
+        return (
+          <img
+            key={item.uuid}
+            src={cover || '/example2.jpg'}
+            alt={item.title}
+            className="w-full h-full object-cover transition-all duration-400 rounded-xl hover:rounded-none shadow-md"
+          />
+        );
+      })}
     </div>
   );
 };
@@ -150,3 +119,5 @@ function loading_circle() {
     </svg>
   );
 }
+
+export default BookGrid;
