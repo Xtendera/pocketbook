@@ -7,7 +7,7 @@
 @layer base {
   body {
     height: 100vh;
-    background-color: rgb(23 23 29);
+    background-color: #17171d;
     color: #fff;
     font-family: 'Roboto', 'sans-serif';
   }

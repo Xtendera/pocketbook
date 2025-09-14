@@ -1,10 +1,6 @@
-import { useRouter } from 'next/router';
 import type { NextPageWithLayout } from './_app';
-import { trpc } from '~/utils/trpc';
 import Nav from '~/components/Nav';
-import Link from 'next/link';
-import { useRef, useState, useEffect, Suspense } from 'react';
-import { BookList } from '~/server/routers/books';
+import { Suspense } from 'react';
 import { Library } from '~/components/Library';
 
 const IndexPage: NextPageWithLayout = () => {
