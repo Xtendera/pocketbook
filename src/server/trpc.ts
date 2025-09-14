@@ -8,7 +8,7 @@
  * @see https://trpc.io/docs/v11/procedures
  */
 
-import { initTRPC } from '@trpc/server';
+import { TRPCError, initTRPC } from '@trpc/server';
 import { transformer } from '~/utils/transformer';
 import type { Context } from './context';
 
@@ -36,6 +36,26 @@ export const router = t.router;
  * @see https://trpc.io/docs/v11/procedures
  **/
 export const publicProcedure = t.procedure;
+
+/**
+ * Create a protected procedure that requires authentication
+ * @see https://trpc.io/docs/v11/procedures
+ */
+export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
+  if (!ctx.userId) {
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+      message: 'You must be logged in to access this endpoint',
+    });
+  }
+  return next({
+    ctx: {
+      ...ctx,
+      userId: ctx.userId, // Now guaranteed to be defined
+      username: ctx.username,
+    },
+  });
+});
 
 /**
  * Merge multiple routers together

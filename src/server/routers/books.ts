@@ -1,4 +1,4 @@
-import { publicProcedure, router } from "~/server/trpc";
+import { publicProcedure, protectedProcedure, router } from "~/server/trpc";
 import { prisma } from "../prisma";
 import z from "zod";
 import { initEpubFile } from "@lingo-reader/epub-parser";
@@ -69,64 +69,62 @@ export const booksRouter = router({
             return { cover };
         }
     ),
-    progress: publicProcedure.input(
+    progress: protectedProcedure.input(
       z.object({
-        bookId: z.string(),
-        userId: z.string()
+        bookId: z.string()
       })
     ).query(
-      async ({ input }) => {
+      async ({ input, ctx }) => {
         const progress = await prisma.bookProgress.findUnique({
           where: {
             userId_bookUuid: {
-              userId: input.userId,
+              userId: ctx.userId,
               bookUuid: input.bookId
             }
           }
         });
         
         return {
-          progress: progress?.progress ?? 0
+          progress: progress?.progress ?? 0,
+          progressStr: progress?.progressStr ?? ""
         };
       }
     ),
-    updateProgress: publicProcedure.input(
+    updateProgress: protectedProcedure.input(
       z.object({
         bookId: z.string(),
-        userId: z.string(),
-        progress: z.number().min(0)
+        progress: z.number().min(0),
+        progressStr: z.string()
       })
     ).mutation(
-      async ({ input }) => {
+      async ({ input, ctx }) => {
         const progress = await prisma.bookProgress.upsert({
           where: {
             userId_bookUuid: {
-              userId: input.userId,
+              userId: ctx.userId,
               bookUuid: input.bookId
             }
           },
           update: {
-            progress: input.progress
+            progress: input.progress,
+            progressStr: input.progressStr
           },
           create: {
-            userId: input.userId,
+            userId: ctx.userId,
             bookUuid: input.bookId,
-            progress: input.progress
+            progress: input.progress,
+            progressStr: input.progressStr
           }
         });
         
         return { success: true, progress: progress.progress };
       }
     ),
-    userProgress: publicProcedure.input(
-      z.object({
-        userId: z.string()
-      })
-    ).query(
-      async ({ input }) => {
+    userProgress: protectedProcedure.query(
+      async ({ ctx }) => {
         const progressEntries = await prisma.bookProgress.findMany({
           where: {
-            userId: input.userId
+            userId: ctx.userId
           },
           include: {
             book: true
@@ -136,7 +134,8 @@ export const booksRouter = router({
         return progressEntries.map(entry => ({
           bookId: entry.bookUuid,
           bookTitle: entry.book.title,
-          progress: entry.progress
+          progress: entry.progress,
+          progressStr: entry.progressStr
         }));
       }
     )

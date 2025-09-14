@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { IReactReaderStyle, ReactReader, ReactReaderStyle } from 'react-reader';
 import { useState, useRef, useEffect } from 'react';
 import { type Rendition } from 'epubjs';
+import { trpc } from '~/utils/trpc';
 
 type ITheme = 'light' | 'dark';
 
@@ -57,14 +58,30 @@ const darkReaderTheme: IReactReaderStyle = {
     ...ReactReaderStyle.tocButton,
     color: 'white',
   },
-}
+};
 
 const ReaderPages: NextPageWithLayout = () => {
+  const utils = trpc.useUtils();
   const [location, setLocation] = useState<string | number>(0);
   const router = useRouter();
   const { id: bookID } = router.query;
   const rendition = useRef<Rendition | undefined>(undefined);
   const [theme, setTheme] = useState<ITheme>('dark');
+  const updateProgress = trpc.books.updateProgress.useMutation();
+
+  // Move the query to the top level
+  const { data: progress } = trpc.books.progress.useQuery(
+    { bookId: bookID as string },
+    { enabled: !!bookID && typeof bookID === 'string' && router.isReady }
+  );
+
+  // if (!router.isReady || !bookID || typeof bookID !== 'string') {
+  //   return (
+  //     <div className="min-w-screen min-h-screen mx-8 flex items-center justify-center">
+  //       <div>Loading...</div>
+  //     </div>
+  //   );
+  // }
 
   useEffect(() => {
     if (rendition.current) {
@@ -72,18 +89,41 @@ const ReaderPages: NextPageWithLayout = () => {
     }
   }, [theme]);
 
-  if (!router.isReady || !bookID || typeof bookID !== 'string') {
-    return (
-      <div className="min-w-screen min-h-screen mx-8 flex items-center justify-center">
-        <div>Loading...</div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!progress) {
+      return;
+    }
+
+    if (progress.progress != 0 || progress.progressStr == '') {
+      setLocation(progress.progress);
+    } else {
+      setLocation(progress.progressStr);
+    }
+  }, [progress]);
+
+  useEffect(() => {
+    if (!router.isReady || !bookID || typeof bookID !== 'string' || location === 0 || location === "") {
+      return;
+    }
+    if (typeof location == 'number') {
+      updateProgress.mutate({
+        bookId: bookID,
+        progress: location,
+        progressStr: '',
+      });
+    } else {
+      updateProgress.mutate({
+        bookId: bookID,
+        progress: 0,
+        progressStr: location,
+      });
+    }
+  }, [location]);
 
   return (
     <div style={{ height: '100vh' }}>
-      <ReactReader
-        url={"/api/content/" + bookID + '.epub'}
+        <ReactReader
+        url={'/api/content/' + bookID + '.epub'}
         location={location}
         readerStyles={darkReaderTheme}
         locationChanged={(epubcfi: string) => setLocation(epubcfi)}

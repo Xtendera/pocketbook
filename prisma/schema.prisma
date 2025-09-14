@@ -25,13 +25,14 @@ model User {
 }
 
 model BookProgress {
-  id       Int    @id @default(autoincrement())
-  userId   String
-  bookUuid String
-  progress Int    @default(0)
-  
+  id          Int    @id @default(autoincrement())
+  userId      String
+  bookUuid    String
+  progress    Int    @default(0)
+  progressStr String @default("")
+
   user User @relation(fields: [userId], references: [uuid], onDelete: Cascade)
   book Book @relation(fields: [bookUuid], references: [uuid], onDelete: Cascade)
-  
+
   @@unique([userId, bookUuid])
 }
