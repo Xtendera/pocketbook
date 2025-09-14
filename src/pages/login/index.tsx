@@ -48,7 +48,7 @@ const LoginPage: NextPageWithLayout = () => {
     setBtnText('Cooking...');
     const resp = await utils.client.auth.login.mutate({
       username: user,
-      password: pass
+      password: pass,
     });
     if (!resp) {
       setBtnText('Something broke :|');
@@ -71,7 +71,7 @@ const LoginPage: NextPageWithLayout = () => {
     await cookieStore.set({
       name: 'jwt',
       value: await resp.token,
-      expires: Date.now() + week
+      expires: Date.now() + week,
     });
     router.push('/');
   }
@@ -90,14 +90,17 @@ const LoginPage: NextPageWithLayout = () => {
       <div className="flex-1 flex items-center justify-center">
         <div className="flex flex-col items-center space-y-6">
           <h2 className="text-4xl">Login</h2>
-          <form className="flex flex-col space-y-4 w-64" onSubmit={handleSubmit}>
+          <form
+            className="flex flex-col space-y-4 w-64"
+            onSubmit={handleSubmit}
+          >
             <input
               type="text"
               name="username"
               onChange={userChange}
               id="user_text"
               placeholder="Username"
-              className="px-3 py-2 bg-pocket-field border border-pocket-blue rounded-xl outline-none focus:outline-none"
+              className="px-3 py-2 bg-pocket-field border border-pocket-blue rounded-xl outline-hidden focus:outline-hidden"
             />
             <input
               type="password"
@@ -105,7 +108,7 @@ const LoginPage: NextPageWithLayout = () => {
               onChange={passChange}
               id="pass_text"
               placeholder="Password"
-              className="px-3 py-2 bg-pocket-field border border-pocket-blue rounded-xl outline-none focus:outline-none"
+              className="px-3 py-2 bg-pocket-field border border-pocket-blue rounded-xl outline-hidden focus:outline-hidden"
             />
             <input
               type="submit"

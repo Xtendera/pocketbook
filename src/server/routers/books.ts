@@ -23,7 +23,7 @@ export async function getEpubCoverBase64(
     );
 
     const manifest = epub.getManifest();
-    let coverItem = coverRef
+    const coverItem = coverRef
       ? Object.values(manifest).find((item) => item.href === coverRef.href)
       : Object.values(manifest).find((item) =>
           item.properties?.includes('cover-image'),
@@ -45,35 +45,31 @@ export async function getEpubCoverBase64(
 
     const base64 = coverBuffer.toString('base64');
     return `data:${mimeType};base64,${base64}`;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
 
-const bookListSchema = z.object({
-  uuid: z.string(),
-  title: z.string(),
-  cover: z.string(),
-});
-
-export type BookList = z.infer<typeof bookListSchema>;
+export type BookList = {
+  uuid: string;
+  title: string;
+  cover: string;
+};
 
 export const booksRouter = router({
   list: publicProcedure.query(async (): Promise<BookList[]> => {
     const books = await prisma.book.findMany();
-    const coveredBooks: BookList[] = await Promise.all(books.map(async (item) => {
-      const bookPath = path.join(
-        process.cwd(),
-        'books',
-        `${item.uuid}.epub`,
-      );
-      const cover = await getEpubCoverBase64(bookPath);
-      return {
-        uuid: item.uuid,
-        title: item.title,
-        cover: cover ?? ''
-      }
-    }));
+    const coveredBooks: BookList[] = await Promise.all(
+      books.map(async (item) => {
+        const bookPath = path.join(process.cwd(), 'books', `${item.uuid}.epub`);
+        const cover = await getEpubCoverBase64(bookPath);
+        return {
+          uuid: item.uuid,
+          title: item.title,
+          cover: cover ?? '',
+        };
+      }),
+    );
     return coveredBooks;
   }),
   cover: publicProcedure

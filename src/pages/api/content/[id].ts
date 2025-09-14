@@ -24,7 +24,7 @@ async function authenticateUser(req: NextApiRequest): Promise<string | null> {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   if (req.method !== 'GET') {
     return res.status(405).json({
@@ -73,7 +73,7 @@ export default async function handler(
 
     try {
       await fs.access(filePath);
-    } catch (error) {
+    } catch {
       return res.status(404).json({
         success: false,
         message: 'Book not found.' + bookId,
@@ -84,12 +84,14 @@ export default async function handler(
 
     res.setHeader('Content-Type', 'application/epub+zip');
     res.setHeader('Content-Length', stats.size.toString());
-    res.setHeader('Content-Disposition', `attachment; filename="${book.title}.epub"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${book.title}.epub"`,
+    );
     res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
 
     const fileBuffer = await fs.readFile(filePath);
     return res.send(fileBuffer);
-
   } catch (error) {
     console.error('Error serving EPUB file:', error);
     return res.status(500).json({

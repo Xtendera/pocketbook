@@ -6,10 +6,10 @@ import { authRouter } from './auth';
 import { booksRouter } from './books';
 export const appRouter = router({
   healthcheck: publicProcedure.query(() => 'yay!'),
-  
+
   auth: authRouter,
 
-  books: booksRouter
+  books: booksRouter,
 });
 
 export const createCaller = createCallerFactory(appRouter);

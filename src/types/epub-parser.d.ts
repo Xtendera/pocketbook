@@ -37,6 +37,6 @@ declare module 'epub-parser' {
 
   function parseEpub(filePath: string): Promise<EPubData>;
   function parseEpub(buffer: Buffer): Promise<EPubData>;
-  
+
   export = parseEpub;
 }

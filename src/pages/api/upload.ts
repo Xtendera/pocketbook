@@ -65,7 +65,9 @@ async function extractEpubTitle(filePath: string): Promise<string> {
     const epubData = await parseEpub(filePath);
     const metadata = epubData.metadata;
 
-    const extractString = (value: string | string[] | undefined): string | undefined => {
+    const extractString = (
+      value: string | string[] | undefined,
+    ): string | undefined => {
       if (Array.isArray(value)) {
         return value.length > 0 ? value[0] : undefined;
       }
@@ -73,14 +75,14 @@ async function extractEpubTitle(filePath: string): Promise<string> {
     };
 
     return extractString(metadata.title) || 'Unknown Title';
-  } catch (error) {
+  } catch {
     return 'Unknown Title';
   }
 }
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<UploadResponse>
+  res: NextApiResponse<UploadResponse>,
 ) {
   if (req.method !== 'POST') {
     return res.status(405).json({
@@ -108,18 +110,18 @@ export default async function handler(
       filter: ({ mimetype, originalFilename }) => {
         return isEpubFile(originalFilename || '', mimetype || '');
       },
-      filename: (name, ext, part) => {
+      filename: (name, ext) => {
         const timestamp = Date.now();
         const random = Math.random().toString(36).substring(2);
         return `temp-${timestamp}-${random}${ext}`;
       },
     });
 
-    const [fields, files] = await form.parse(req);
+    const [, files] = await form.parse(req);
 
     const uploadedBooks = [];
 
-    for (const [fieldName, fileArray] of Object.entries(files)) {
+    for (const [, fileArray] of Object.entries(files)) {
       if (Array.isArray(fileArray)) {
         for (const file of fileArray) {
           if (!isEpubFile(file.originalFilename || '', file.mimetype || '')) {
@@ -146,8 +148,7 @@ export default async function handler(
               filepath: newFilepath,
               size: file.size,
             });
-
-          } catch (error) {
+          } catch {
             await fs.unlink(file.filepath);
             continue;
           }
@@ -167,7 +168,6 @@ export default async function handler(
       message: `Successfully uploaded ${uploadedBooks.length} book(s).`,
       books: uploadedBooks,
     });
-
   } catch (error) {
     return res.status(500).json({
       success: false,

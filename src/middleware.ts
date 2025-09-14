@@ -3,7 +3,9 @@ import { extractTokenBody } from './utils/jwt';
 
 const week = 24 * 60 * 60 * 1000 * 7;
 
-async function authenticate(token: string): Promise<{ isValid: boolean; userId?: string; username?: string }> {
+async function authenticate(
+  token: string,
+): Promise<{ isValid: boolean; userId?: string; username?: string }> {
   const body = await extractTokenBody(token);
   if (!body) {
     return { isValid: false };
@@ -16,12 +18,14 @@ async function authenticate(token: string): Promise<{ isValid: boolean; userId?:
 }
 
 export async function middleware(request: NextRequest) {
-  let authResult: { isValid: boolean; userId?: string; username?: string } = { isValid: false };
+  let authResult: { isValid: boolean; userId?: string; username?: string } = {
+    isValid: false,
+  };
   const cookie = request.cookies.get('jwt');
   if (cookie) {
     authResult = await authenticate(cookie.value);
   }
-  
+
   if (
     request.nextUrl.pathname === '/login' ||
     request.nextUrl.pathname.startsWith('/login/')
@@ -31,9 +35,13 @@ export async function middleware(request: NextRequest) {
 
     return;
   }
-  
+
   // Path is NOT login.
-  if (!authResult.isValid && !request.nextUrl.pathname.startsWith('/_next/') && !request.nextUrl.pathname.startsWith('/api/')) {
+  if (
+    !authResult.isValid &&
+    !request.nextUrl.pathname.startsWith('/_next/') &&
+    !request.nextUrl.pathname.startsWith('/api/')
+  ) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

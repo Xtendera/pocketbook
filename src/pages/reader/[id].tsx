@@ -61,18 +61,17 @@ const darkReaderTheme: IReactReaderStyle = {
 };
 
 const ReaderPages: NextPageWithLayout = () => {
-  const utils = trpc.useUtils();
   const [location, setLocation] = useState<string | number>(0);
   const router = useRouter();
   const { id: bookID } = router.query;
   const rendition = useRef<Rendition | undefined>(undefined);
-  const [theme, setTheme] = useState<ITheme>('dark');
+  const [theme] = useState<ITheme>('dark');
   const updateProgress = trpc.books.updateProgress.useMutation();
 
   // Move the query to the top level
   const { data: progress } = trpc.books.progress.useQuery(
     { bookId: bookID as string },
-    { enabled: !!bookID && typeof bookID === 'string' && router.isReady }
+    { enabled: !!bookID && typeof bookID === 'string' && router.isReady },
   );
 
   // if (!router.isReady || !bookID || typeof bookID !== 'string') {
@@ -102,7 +101,13 @@ const ReaderPages: NextPageWithLayout = () => {
   }, [progress]);
 
   useEffect(() => {
-    if (!router.isReady || !bookID || typeof bookID !== 'string' || location === 0 || location === "") {
+    if (
+      !router.isReady ||
+      !bookID ||
+      typeof bookID !== 'string' ||
+      location === 0 ||
+      location === ''
+    ) {
       return;
     }
     if (typeof location == 'number') {
@@ -122,7 +127,7 @@ const ReaderPages: NextPageWithLayout = () => {
 
   return (
     <div style={{ height: '100vh' }}>
-        <ReactReader
+      <ReactReader
         url={'/api/content/' + bookID + '.epub'}
         location={location}
         readerStyles={darkReaderTheme}
