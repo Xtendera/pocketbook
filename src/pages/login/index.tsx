@@ -76,7 +76,7 @@ const LoginPage: NextPageWithLayout<LoginPageProps> = ({ config }) => {
 
     const week = 24 * 60 * 60 * 1000 * 7;
     const expires = new Date(Date.now() + week).toUTCString();
-    document.cookie = `jwt=${resp.token}; expires=${expires}; path=/; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`;
+    document.cookie = `jwt=${await resp.token}; expires=${expires}; path=/; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`;
     router.push('/');
   }
 
