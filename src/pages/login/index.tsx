@@ -75,11 +75,8 @@ const LoginPage: NextPageWithLayout<LoginPageProps> = ({ config }) => {
     setBtnText('Done!');
 
     const week = 24 * 60 * 60 * 1000 * 7;
-    await cookieStore.set({
-      name: 'jwt',
-      value: await resp.token,
-      expires: Date.now() + week,
-    });
+    const expires = new Date(Date.now() + week).toUTCString();
+    document.cookie = `jwt=${resp.token}; expires=${expires}; path=/; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`;
     router.push('/');
   }
 
