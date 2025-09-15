@@ -1,13 +1,12 @@
 import { protectedProcedure, router } from '~/server/trpc';
 import { prisma } from '../prisma';
 import z from 'zod';
-import { initEpubFile } from '@lingo-reader/epub-parser';
 import path from 'path';
 import JSZip from 'jszip';
-import fs from 'fs/promises';
 
 // This function was rewritten to work with Vercel blob storage and process everything in-memory
 // It fetches the EPUB file from the blob URL and extracts the cover image without writing to disk
+// We avoid using epub-parser to prevent filesystem operations
 export async function getEpubCoverBase64(
   blobUrl: string,
 ): Promise<string | null> {
@@ -22,49 +21,112 @@ export async function getEpubCoverBase64(
     const epubBuffer = Buffer.from(await response.arrayBuffer());
     const zip = await JSZip.loadAsync(epubBuffer);
 
-    // Create a temporary file path for epub-parser (it needs a file path, not buffer)
-    const tempPath = `/tmp/temp-${Date.now()}.epub`;
-    await fs.writeFile(tempPath, epubBuffer);
+    // Read container.xml to find the OPF file
+    const containerFile = zip.file('META-INF/container.xml');
+    if (!containerFile) {
+      console.error('No container.xml found in EPUB');
+      return null;
+    }
 
-    try {
-      const epub = await initEpubFile(tempPath);
+    const containerContent = await containerFile.async('text');
+    const opfPathMatch = containerContent.match(/full-path="([^"]+)"/);
+    if (!opfPathMatch) {
+      console.error('Could not find OPF path in container.xml');
+      return null;
+    }
 
-      const guide = epub.getGuide();
-      const coverRef = guide.find(
-        (item) => item.type === 'cover' || item.type === 'cover-image',
-      );
+    const opfPath = opfPathMatch[1];
+    const opfFile = zip.file(opfPath);
+    if (!opfFile) {
+      console.error(`OPF file not found: ${opfPath}`);
+      return null;
+    }
 
-      const manifest = epub.getManifest();
-      const coverItem = coverRef
-        ? Object.values(manifest).find((item) => item.href === coverRef.href)
-        : Object.values(manifest).find((item) =>
-            item.properties?.includes('cover-image'),
-          );
+    const opfContent = await opfFile.async('text');
+    
+    // Look for cover image in metadata
+    let coverImageId: string | null = null;
+    
+    // Method 1: Look for meta name="cover" content="..."
+    const coverMetaMatch = opfContent.match(/<meta\s+name="cover"\s+content="([^"]+)"/i);
+    if (coverMetaMatch) {
+      coverImageId = coverMetaMatch[1];
+    }
 
-      if (!coverItem) return null;
-
-      const zipFile = zip.file(coverItem.href);
-      if (!zipFile) return null;
-
-      const coverBuffer = await zipFile.async('nodebuffer');
-
-      const ext = path.extname(coverItem.href).toLowerCase();
-      let mimeType = 'image/jpeg'; // default fallback
-      if (ext === '.png') mimeType = 'image/png';
-      else if (ext === '.gif') mimeType = 'image/gif';
-      else if (ext === '.svg') mimeType = 'image/svg+xml';
-      else if (ext === '.webp') mimeType = 'image/webp';
-
-      const base64 = coverBuffer.toString('base64');
-      return `data:${mimeType};base64,${base64}`;
-    } finally {
-      // Clean up the temporary file
-      try {
-        await fs.unlink(tempPath);
-      } catch (error) {
-        console.error('Error cleaning up temp file:', error);
+    // Method 2: Look for item with properties="cover-image"
+    if (!coverImageId) {
+      const coverPropsMatch = opfContent.match(/<item[^>]+properties="[^"]*cover-image[^"]*"[^>]+id="([^"]+)"/i);
+      if (coverPropsMatch) {
+        coverImageId = coverPropsMatch[1];
       }
     }
+
+    // Method 3: Look for items with common cover names
+    if (!coverImageId) {
+      const itemMatches = opfContent.matchAll(/<item[^>]+id="([^"]+)"[^>]+href="([^"]+)"/gi);
+      for (const match of itemMatches) {
+        const href = match[2].toLowerCase();
+        if (href.includes('cover') && (href.endsWith('.jpg') || href.endsWith('.jpeg') || href.endsWith('.png') || href.endsWith('.gif'))) {
+          coverImageId = match[1];
+          break;
+        }
+      }
+    }
+
+    if (!coverImageId) {
+      console.error('No cover image ID found in OPF');
+      return null;
+    }
+
+    // Find the href for this ID - more flexible regex that handles attributes in any order
+    let coverHref: string | null = null;
+    
+    // Look for item with the matching ID and extract href
+    const itemMatches = opfContent.matchAll(/<item[^>]*>/gi);
+    for (const itemMatch of itemMatches) {
+      const itemTag = itemMatch[0];
+      
+      // Check if this item has the cover ID
+      const idMatch = itemTag.match(/id="([^"]+)"/i);
+      if (idMatch && idMatch[1] === coverImageId) {
+        // Extract href from this item
+        const hrefMatch = itemTag.match(/href="([^"]+)"/i);
+        if (hrefMatch) {
+          coverHref = hrefMatch[1];
+          break;
+        }
+      }
+    }
+
+    if (!coverHref) {
+      console.error(`Could not find href for cover ID: ${coverImageId}`);
+      return null;
+    }
+    
+    // Resolve relative path from OPF directory
+    const opfDir = path.dirname(opfPath);
+    if (opfDir && opfDir !== '.') {
+      coverHref = path.join(opfDir, coverHref).replace(/\\/g, '/');
+    }
+
+    // Extract the cover image from the ZIP
+    const coverFile = zip.file(coverHref);
+    if (!coverFile) {
+      console.error(`Cover image file not found: ${coverHref}`);
+      return null;
+    }
+
+    const coverBuffer = await coverFile.async('nodebuffer');
+
+    const ext = path.extname(coverHref).toLowerCase();
+    let mimeType = 'image/jpeg'; // default fallback
+    if (ext === '.png') mimeType = 'image/png';
+    else if (ext === '.gif') mimeType = 'image/gif';
+    else if (ext === '.svg') mimeType = 'image/svg+xml';
+    else if (ext === '.webp') mimeType = 'image/webp';
+
+    const base64 = coverBuffer.toString('base64');
+    return `data:${mimeType};base64,${base64}`;
   } catch (error) {
     console.error('Error extracting EPUB cover:', error);
     return null;
