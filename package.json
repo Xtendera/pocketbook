@@ -47,6 +47,7 @@
     "superjson": "^1.13.3",
     "zod": "^3.25.76"
   },
+
   "devDependencies": {
     "@playwright/test": "^1.55.0",
     "@tailwindcss/postcss": "^4.1.13",

@@ -2,7 +2,7 @@ import type { NextPageWithLayout } from './_app';
 import Nav from '~/components/Nav';
 import { Suspense, lazy, useState, useEffect } from 'react';
 import Loading from '~/components/Loading';
-import { GetStaticProps } from 'next';
+import { GetServerSideProps } from 'next';
 
 const BookGrid = lazy(() => import('../components/BookGrid'));
 
@@ -64,7 +64,7 @@ const IndexPage: NextPageWithLayout<MainPageProps> = ({ config }) => {
 };
 export default IndexPage;
 
-export const getStaticProps: GetStaticProps<MainPageProps> = async () => {
+export const getServerSideProps: GetServerSideProps<MainPageProps> = async () => {
   const appConfig = {
     isDemoMode: process.env.DEMO === 'true',
   };

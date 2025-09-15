@@ -1,7 +1,7 @@
 // import { trpc } from '../utils/trpc';
 import { useState } from 'react';
 import type { NextPageWithLayout } from '../_app';
-import type { GetStaticProps } from 'next';
+import type { GetServerSideProps } from 'next';
 import { trpc } from '~/utils/trpc';
 import { useRouter } from 'next/router';
 // import type { inferProcedureInput } from '@trpc/server';
@@ -96,6 +96,7 @@ const LoginPage: NextPageWithLayout<LoginPageProps> = ({ config }) => {
       <div className="flex-1 flex items-center justify-center">
         <div className="flex flex-col items-center space-y-6">
           <h2 className="text-4xl">Login</h2>
+          {config.isDemoMode ? "geWgewsgews" : ""}
           {config.isDemoMode && (
             <div className="bg-pocket-blue/10 border border-pocket-blue/30 rounded-xl p-4 w-64">
               <div className="text-center text-pocket-blue text-sm font-medium mb-2">
@@ -148,7 +149,7 @@ const LoginPage: NextPageWithLayout<LoginPageProps> = ({ config }) => {
 
 export default LoginPage;
 
-export const getStaticProps: GetStaticProps<LoginPageProps> = async () => {
+export const getServerSideProps: GetServerSideProps<LoginPageProps> = async () => {
   const appConfig = {
     isDemoMode: process.env.DEMO === 'true',
   };
