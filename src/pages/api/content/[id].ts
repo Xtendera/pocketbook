@@ -6,7 +6,7 @@ async function authenticateUser(req: NextApiRequest): Promise<string | null> {
   const cookies = req.headers.cookie;
   if (!cookies) return null;
 
-  const jwtMatch = cookies.match(/jwt=([^;]+)/);
+  const jwtMatch = cookies.match(/(?:^|; )jwt=([^;]+)/);
   if (!jwtMatch) return null;
 
   const token = jwtMatch[1];
