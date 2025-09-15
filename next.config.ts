@@ -25,4 +25,6 @@ export default {
   },
   /** Enable standalone output for Docker optimization */
   output: 'standalone',
+  /** Disable compression to prevent conflicts with Cloudflare tunnels */
+  compress: false,
 } satisfies NextConfig;
