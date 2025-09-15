@@ -1,6 +1,7 @@
 // import { trpc } from '../utils/trpc';
 import { useState } from 'react';
 import type { NextPageWithLayout } from '../_app';
+import type { GetStaticProps } from 'next';
 import { trpc } from '~/utils/trpc';
 import { useRouter } from 'next/router';
 // import type { inferProcedureInput } from '@trpc/server';
@@ -8,7 +9,13 @@ import { useRouter } from 'next/router';
 // import { Fragment } from 'react';
 // import type { AppRouter } from '~/server/routers/_app';
 
-const LoginPage: NextPageWithLayout = () => {
+interface LoginPageProps {
+  config: {
+    isDemoMode: boolean;
+  };
+}
+
+const LoginPage: NextPageWithLayout<LoginPageProps> = ({ config }) => {
   const utils = trpc.useUtils(); // Gets the tRPC object with all of the remote calls from the server
   // const postsQuery = trpc.post.list.useInfiniteQuery(
   //   {
@@ -86,10 +93,26 @@ const LoginPage: NextPageWithLayout = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <h1 className="text-3xl ml-8 mt-8 font-medium">Pocket Book</h1>
       <div className="flex-1 flex items-center justify-center">
         <div className="flex flex-col items-center space-y-6">
           <h2 className="text-4xl">Login</h2>
+          {config.isDemoMode && (
+            <div className="bg-pocket-blue/10 border border-pocket-blue/30 rounded-xl p-4 w-64">
+              <div className="text-center text-pocket-blue text-sm font-medium mb-2">
+                Demo Credentials
+              </div>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Username:</span>
+                  <span className="font-mono">admin</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Password:</span>
+                  <span className="font-mono">test123</span>
+                </div>
+              </div>
+            </div>
+          )}
           <form
             className="flex flex-col space-y-4 w-64"
             onSubmit={handleSubmit}
@@ -124,6 +147,18 @@ const LoginPage: NextPageWithLayout = () => {
 };
 
 export default LoginPage;
+
+export const getStaticProps: GetStaticProps<LoginPageProps> = async () => {
+  const appConfig = {
+    isDemoMode: process.env.DEMO === 'true',
+  };
+
+  return {
+    props: {
+      config: appConfig,
+    }
+  };
+};
 
 /**
  * If you want to statically render this page

@@ -1,4 +1,4 @@
-import { publicProcedure, protectedProcedure, router } from '~/server/trpc';
+import { protectedProcedure, router } from '~/server/trpc';
 import { prisma } from '../prisma';
 import z from 'zod';
 import { initEpubFile } from '@lingo-reader/epub-parser';
@@ -57,7 +57,7 @@ export type BookList = {
 };
 
 export const booksRouter = router({
-  list: publicProcedure.query(async (): Promise<BookList[]> => {
+  list: protectedProcedure.query(async (): Promise<BookList[]> => {
     const books = await prisma.book.findMany();
     const coveredBooks: BookList[] = await Promise.all(
       books.map(async (item) => {
@@ -72,7 +72,7 @@ export const booksRouter = router({
     );
     return coveredBooks;
   }),
-  cover: publicProcedure
+  cover: protectedProcedure
     .input(
       z.object({
         bookID: z.string().nonempty(),

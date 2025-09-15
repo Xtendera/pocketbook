@@ -1,9 +1,12 @@
 import { useRef, useState } from 'react';
 import { trpc } from '~/utils/trpc';
 import Loading from './Loading';
+import { useRouter } from 'next/router';
+import type { RouterOutput } from '~/utils/trpc';
 
 const BookGrid: React.FC = () => {
   const utils = trpc.useUtils();
+  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const handlePlusClick = () => {
@@ -56,7 +59,27 @@ const BookGrid: React.FC = () => {
     }
   };
 
-  const [books] = trpc.books.list.useSuspenseQuery();
+  const handleBookRead = (bookItem: RouterOutput['books']['list'][0]) => {
+    router.push(`/reader/${bookItem.uuid}`);
+  }
+
+  const { data: books, isLoading, error } = trpc.books.list.useQuery();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center mt-10">
+        <Loading />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center mt-10">
+        <p className="text-red-500">Error loading books: {error.message}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 mt-6">
@@ -79,14 +102,15 @@ const BookGrid: React.FC = () => {
           {uploading ? <Loading /> : add_circle()}
         </div>
       </div>
-      {books.map((item) => {
+      {books?.map((item) => {
         const cover = item.cover;
         return (
           <img
             key={item.uuid}
             src={cover || '/example2.jpg'}
             alt={item.title}
-            className="w-full h-full object-cover transition-all duration-400 rounded-xl hover:rounded-none shadow-md"
+            onClick={() => handleBookRead(item)}
+            className="w-full h-full hover:cursor-pointer object-cover transition-all duration-400 rounded-xl hover:rounded-none shadow-md"
           />
         );
       })}

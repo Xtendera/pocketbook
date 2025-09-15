@@ -3,6 +3,8 @@ import { extractTokenBody } from './utils/jwt';
 
 const week = 24 * 60 * 60 * 1000 * 7;
 
+
+
 async function authenticate(
   token: string,
 ): Promise<{ isValid: boolean; userId?: string; username?: string }> {
@@ -14,6 +16,7 @@ async function authenticate(
   if (Date.now() > xpr) {
     return { isValid: false };
   }
+
   return { isValid: true, userId: body.sub, username: body.user };
 }
 
@@ -56,4 +59,5 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: '/:path*',
+  runtime: 'nodejs'
 };

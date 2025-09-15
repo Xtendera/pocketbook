@@ -43,3 +43,5 @@ playwright/test-results
 
 #Keyfiles
 hmac.key
+
+images/*
