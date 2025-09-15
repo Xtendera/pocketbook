@@ -96,7 +96,6 @@ const LoginPage: NextPageWithLayout<LoginPageProps> = ({ config }) => {
       <div className="flex-1 flex items-center justify-center">
         <div className="flex flex-col items-center space-y-6">
           <h2 className="text-4xl">Login</h2>
-          {config.isDemoMode ? "geWgewsgews" : ""}
           {config.isDemoMode && (
             <div className="bg-pocket-blue/10 border border-pocket-blue/30 rounded-xl p-4 w-64">
               <div className="text-center text-pocket-blue text-sm font-medium mb-2">
