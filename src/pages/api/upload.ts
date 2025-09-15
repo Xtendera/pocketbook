@@ -5,6 +5,7 @@ import path from 'path';
 import { extractTokenBody } from '../../utils/jwt';
 import { prisma } from '../../server/prisma';
 import parseEpub from 'epub-parser';
+import { put } from '@vercel/blob';
 
 export const config = {
   api: {
@@ -16,7 +17,7 @@ type BookData = {
   uuid: string;
   title: string;
   originalFilename: string;
-  filepath: string;
+  blobUrl: string;
   size: number;
 };
 
@@ -26,16 +27,6 @@ type UploadResponse = {
   books?: BookData[];
   error?: string;
 };
-
-const UPLOAD_DIR = path.join(process.cwd(), 'books');
-
-async function ensureUploadDir() {
-  try {
-    await fs.access(UPLOAD_DIR);
-  } catch {
-    await fs.mkdir(UPLOAD_DIR, { recursive: true });
-  }
-}
 
 async function authenticateUser(req: NextApiRequest): Promise<string | null> {
   const cookies = req.headers.cookie;
@@ -100,20 +91,12 @@ export default async function handler(
       });
     }
 
-    await ensureUploadDir();
-
     const form = formidable({
-      uploadDir: UPLOAD_DIR,
       keepExtensions: true,
       maxFileSize: 100 * 1024 * 1024,
       maxFiles: 5,
       filter: ({ mimetype, originalFilename }) => {
         return isEpubFile(originalFilename || '', mimetype || '');
-      },
-      filename: (name, ext) => {
-        const timestamp = Date.now();
-        const random = Math.random().toString(36).substring(2);
-        return `temp-${timestamp}-${random}${ext}`;
       },
     });
 
@@ -132,24 +115,35 @@ export default async function handler(
           try {
             const title = await extractEpubTitle(file.filepath);
 
+            // Read the file to upload to Vercel Blob
+            const fileBuffer = await fs.readFile(file.filepath);
+            
+            // Upload to Vercel Blob
+            const blob = await put(`${Date.now()}-${file.originalFilename}`, fileBuffer, {
+              access: 'public',
+              contentType: file.mimetype || 'application/epub+zip',
+            });
+
             const book = await prisma.book.create({
               data: {
                 title,
+                blobUrl: blob.url,
               },
             });
 
-            const newFilepath = path.join(UPLOAD_DIR, `${book.uuid}.epub`);
-            await fs.rename(file.filepath, newFilepath);
+            // Clean up the temporary file
+            await fs.unlink(file.filepath);
 
             uploadedBooks.push({
               uuid: book.uuid,
               title: book.title,
               originalFilename: file.originalFilename || 'unknown.epub',
-              filepath: newFilepath,
+              blobUrl: blob.url,
               size: file.size,
             });
-          } catch {
+          } catch (error) {
             await fs.unlink(file.filepath);
+            console.error('Error processing file:', error);
             continue;
           }
         }

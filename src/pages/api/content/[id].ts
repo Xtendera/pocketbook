@@ -1,6 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import fs from 'fs/promises';
-import path from 'path';
 import { prisma } from '../../../server/prisma';
 import { extractTokenBody } from '../../../utils/jwt';
 
@@ -69,29 +67,39 @@ export default async function handler(
       });
     }
 
-    const filePath = path.join(process.cwd(), 'books', `${bookId}.epub`);
-
-    try {
-      await fs.access(filePath);
-    } catch {
+    if (!book.blobUrl) {
       return res.status(404).json({
         success: false,
-        message: 'Book not found.' + bookId,
+        message: 'Book file not available.',
       });
     }
 
-    const stats = await fs.stat(filePath);
+    try {
+      // Fetch the file from Vercel Blob storage
+      const response = await fetch(book.blobUrl);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch file from blob storage');
+      }
 
-    res.setHeader('Content-Type', 'application/epub+zip');
-    res.setHeader('Content-Length', stats.size.toString());
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="${book.title}.epub"`,
-    );
-    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+      const fileBuffer = await response.arrayBuffer();
 
-    const fileBuffer = await fs.readFile(filePath);
-    return res.send(fileBuffer);
+      res.setHeader('Content-Type', 'application/epub+zip');
+      res.setHeader('Content-Length', fileBuffer.byteLength.toString());
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${book.title}.epub"`,
+      );
+      res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+
+      return res.send(Buffer.from(fileBuffer));
+    } catch (error) {
+      console.error('Error fetching file from blob storage:', error);
+      return res.status(404).json({
+        success: false,
+        message: 'Book file not found in storage.',
+      });
+    }
   } catch (error) {
     console.error('Error serving EPUB file:', error);
     return res.status(500).json({
