@@ -37,6 +37,9 @@ async function authenticateUser(req: NextApiRequest): Promise<string | null> {
   if (!jwtMatch) return null;
 
   const token = jwtMatch[1];
+
+  console.log("TOKTOKTOK: " + token);
+
   const body = await extractTokenBody(token);
   if (!body) return null;
 
