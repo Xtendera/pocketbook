@@ -44,7 +44,6 @@ export default async function handler(
 
     // Extract UUID from the filename (remove .epub extension if present)
     let bookId = id;
-    console.log(bookId);
     if (typeof id === 'string' && id.endsWith('.epub')) {
       bookId = id.slice(0, -5); // Remove .epub extension
     }

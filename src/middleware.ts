@@ -22,19 +22,12 @@ export async function middleware(request: NextRequest) {
   let authResult: { isValid: boolean; userId?: string; username?: string } = {
     isValid: false,
   };
-  
-  // Debug logging for Vercel
-  console.log('Middleware - All cookies:', request.cookies.getAll());
-  console.log('Middleware - Cookie header:', request.headers.get('cookie'));
+
   
   const cookie = request.cookies.get('jwt');
-  console.log('Middleware - JWT cookie:', cookie);
   
   if (cookie) {
     authResult = await authenticate(cookie.value);
-    console.log('Middleware - Auth result:', authResult);
-  } else {
-    console.log('Middleware - No JWT cookie found');
   }
 
   if (

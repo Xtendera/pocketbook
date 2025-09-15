@@ -29,7 +29,6 @@ type UploadResponse = {
 };
 
 async function authenticateUser(req: NextApiRequest): Promise<string | null> {
-  console.log(req.headers.cookie);
   const cookies = req.headers.cookie;
   if (!cookies) return null;
 
