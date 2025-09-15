@@ -33,8 +33,6 @@ export async function extractTokenBody(token: string): Promise<JWTBody | null> {
   try {
     const secret = getKey();
 
-    console.log("SECSECSEC: " + getKey());
-
     const { payload } = await jwtVerify(token, secret, {
       algorithms: ['HS256'],
     });
