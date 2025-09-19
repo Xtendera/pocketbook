@@ -33,9 +33,11 @@ const IndexPage: NextPageWithLayout<MainPageProps> = ({ config }) => {
 
       {/* Demo Warning Popup */}
       {showDemoWarning && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 max-w-md mx-4 shadow-xl">
-            <h3 className="text-xl font-semibold text-red-600 mb-4">Demo Environment Notice</h3>
+            <h3 className="text-xl font-semibold text-red-600 mb-4">
+              Demo Environment Notice
+            </h3>
             <div className="space-y-3 text-gray-700">
               <div className="flex items-start space-x-2">
                 <span className="text-red-500 font-bold">•</span>
@@ -64,7 +66,9 @@ const IndexPage: NextPageWithLayout<MainPageProps> = ({ config }) => {
 };
 export default IndexPage;
 
-export const getServerSideProps: GetServerSideProps<MainPageProps> = async () => {
+export const getServerSideProps: GetServerSideProps<
+  MainPageProps
+> = async () => {
   const appConfig = {
     isDemoMode: process.env.DEMO === 'true',
   };

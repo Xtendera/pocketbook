@@ -4,7 +4,6 @@ import fs from 'fs/promises';
 import path from 'path';
 import { extractTokenBody } from '../../utils/jwt';
 import { prisma } from '../../server/prisma';
-import parseEpub from 'epub-parser';
 
 export const config = {
   api: {
@@ -60,26 +59,6 @@ function isEpubFile(filename: string, mimetype?: string): boolean {
   return ext === '.epub' || mimetype === 'application/epub+zip';
 }
 
-async function extractEpubTitle(filePath: string): Promise<string> {
-  try {
-    const epubData = await parseEpub(filePath);
-    const metadata = epubData.metadata;
-
-    const extractString = (
-      value: string | string[] | undefined,
-    ): string | undefined => {
-      if (Array.isArray(value)) {
-        return value.length > 0 ? value[0] : undefined;
-      }
-      return value;
-    };
-
-    return extractString(metadata.title) || 'Unknown Title';
-  } catch {
-    return 'Unknown Title';
-  }
-}
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<UploadResponse>,
@@ -117,7 +96,18 @@ export default async function handler(
       },
     });
 
-    const [, files] = await form.parse(req);
+    const [fields, files] = await form.parse(req);
+
+    const customTitle = Array.isArray(fields.title)
+      ? fields.title[0]
+      : fields.title;
+
+    if (!customTitle || !customTitle.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Book title is required.',
+      });
+    }
 
     const uploadedBooks = [];
 
@@ -130,7 +120,7 @@ export default async function handler(
           }
 
           try {
-            const title = await extractEpubTitle(file.filepath);
+            const title = customTitle.trim();
 
             const book = await prisma.book.create({
               data: {

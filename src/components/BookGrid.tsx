@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { trpc } from '~/utils/trpc';
 import Loading from './Loading';
+import UploadModal from './UploadModal';
 import { useRouter } from 'next/router';
 import type { RouterOutput } from '~/utils/trpc';
 
@@ -9,6 +10,8 @@ const BookGrid: React.FC = () => {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const handlePlusClick = () => {
     fileInputRef.current?.click();
   };
@@ -29,6 +32,12 @@ const BookGrid: React.FC = () => {
       return;
     }
 
+    setSelectedFiles(files);
+    setShowModal(true);
+    e.target.value = ''; // Reset file input
+  };
+
+  const handleUpload = async (title: string, files: FileList) => {
     setUploading(true);
 
     try {
@@ -37,6 +46,8 @@ const BookGrid: React.FC = () => {
       for (let i = 0; i < files.length; i++) {
         formData.append('books', files[i]);
       }
+
+      formData.append('title', title);
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -47,8 +58,9 @@ const BookGrid: React.FC = () => {
       const result = await response.json();
 
       if (result.success) {
-        e.target.value = '';
         await utils.books.list.invalidate();
+        setShowModal(false);
+        setSelectedFiles(null);
       } else {
         alert(`Upload failed: ${result.message}`);
       }
@@ -59,9 +71,14 @@ const BookGrid: React.FC = () => {
     }
   };
 
+  const handleModalClose = () => {
+    setShowModal(false);
+    setSelectedFiles(null);
+  };
+
   const handleBookRead = (bookItem: RouterOutput['books']['list'][0]) => {
     router.push(`/reader/${bookItem.uuid}`);
-  }
+  };
 
   const { data: books, isLoading, error } = trpc.books.list.useQuery();
 
@@ -90,6 +107,14 @@ const BookGrid: React.FC = () => {
         accept=".epub,application/epub+zip"
         onChange={handleFileChange}
         style={{ display: 'none' }}
+      />
+
+      <UploadModal
+        isOpen={showModal}
+        onClose={handleModalClose}
+        onUpload={handleUpload}
+        files={selectedFiles}
+        uploading={uploading}
       />
 
       <div

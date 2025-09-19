@@ -155,4 +155,17 @@ export const booksRouter = router({
       progressStr: entry.progressStr,
     }));
   }),
+  searchID: protectedProcedure
+    .input(z.string().nonempty().min(9).max(13))
+    .query(async ({ input }) => {
+      if (
+        input.length === 9 &&
+        input.slice(0, 2) === 'OL' &&
+        input.slice(-1) === 'W'
+      ) {
+        // OpenLibrary ID
+      } else if (input.length === 13 || input.length === 10) {
+        // ISBN ID (Currently API-Bricked)
+      }
+    }),
 });
