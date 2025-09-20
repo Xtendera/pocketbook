@@ -18,6 +18,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
 }) => {
   const [title, setTitle] = useState<string>('');
   const [searchID, setSearchID] = useState<string>('');
+  const [searchError, setSearchError] = useState<string>('');
   const utils = trpc.useUtils();
 
   if (!isOpen) return null;
@@ -40,21 +41,24 @@ const UploadModal: React.FC<UploadModalProps> = ({
 
   const updateSearchID = async (input: string) => {
     setSearchID(input);
-    if (input.length !== 10 && input.length !== 13) {
+    if (input.slice(0, 2) !== 'OL' && input.slice(-1) !== 'W') {
       return;
     }
     try {
       const data = await utils.books.searchID.fetch(input);
+      setSearchError('');
       if (!data.success) {
-        // WIP
+        setSearchError(data.message);
+        return;
       }
       if (!data.title) {
-        // WIP
+        setSearchError(data.message);
+        return;
       }
-      // alert(data.message)
       setTitle(data.title);
     } catch {
-      // WIP
+      setSearchError('Unkown error! Check console!');
+      return;
     }
   };
 
@@ -105,9 +109,12 @@ const UploadModal: React.FC<UploadModalProps> = ({
                 onPaste={handleSearchIDPaste}
                 placeholder="140566438X/9781405664387/OL102749W"
                 disabled={uploading}
-                className="w-full px-3 py-2 bg-pocket-field border border-pocket-blue rounded-xl outline-none focus:outline-none text-white placeholder-gray-500 disabled:opacity-50"
+                className={`w-full px-3 py-2 bg-pocket-field border rounded-xl outline-none focus:outline-none ${searchError ? 'border-red-500' : 'border-pocket-blue'} text-white placeholder-gray-500 disabled:opacity-50`}
                 autoFocus
               />
+              {searchError && (
+                <span className="text-sm text-red-500">{searchError}</span>
+              )}
             </div>
             <div>
               <label

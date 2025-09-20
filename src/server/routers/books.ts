@@ -166,11 +166,7 @@ export const booksRouter = router({
   searchID: protectedProcedure
     .input(z.string().nonempty().min(9).max(13))
     .query(async ({ input }) => {
-      if (
-        input.length === 10 &&
-        input.slice(0, 2) === 'OL' &&
-        input.slice(-1) === 'W'
-      ) {
+      if (input.slice(0, 2) === 'OL' && input.slice(-1) === 'W') {
         // OpenLibrary ID
         const dataRaw = await fetch(
           `https://openlibrary.org/works/${input}.json`,

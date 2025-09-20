@@ -118,7 +118,7 @@ const BookGrid: React.FC = () => {
       />
 
       <div
-        className={`w-full h-auto transition-all duration-400 border-gray-600 hover:border-gray-400 border-dashed border-4 flex items-center justify-center cursor-pointer group ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`w-full h-full transition-all duration-400 border-gray-600 hover:border-gray-400 border-dashed border-4 flex items-center justify-center cursor-pointer group ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
         onClick={uploading ? undefined : handlePlusClick}
       >
         <div
@@ -130,13 +130,18 @@ const BookGrid: React.FC = () => {
       {books?.map((item) => {
         const cover = item.cover;
         return (
-          <img
-            key={item.uuid}
-            src={cover || '/example2.jpg'}
-            alt={item.title}
-            onClick={() => handleBookRead(item)}
-            className="w-full h-full hover:cursor-pointer object-cover transition-all duration-400 rounded-xl hover:rounded-none shadow-md"
-          />
+          <div className="relative size-auto group">
+            <img
+              key={item.uuid}
+              src={cover || '/example2.jpg'}
+              alt={item.title}
+              onClick={() => handleBookRead(item)}
+              className="w-full h-full hover:cursor-pointer object-cover transition-all duration-400 rounded-xl hover:rounded-none shadow-md"
+            />
+            <span className="opacity-0 group-hover:opacity-100 absolute inset-x-0 bottom-0 text-center bg-black/50 text-white p-2 rounded-b-xl transition-opacity duration-300 ease-in-out">
+              {item.title}
+            </span>
+          </div>
         );
       })}
     </div>
