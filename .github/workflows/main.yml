@@ -2,7 +2,7 @@ name: Testing
 on: [push]
 jobs:
   e2e:
-    name: 'Build + E2E tests'
+    name: 'Build + Lint'
     services:
       postgres:
         image: postgres
