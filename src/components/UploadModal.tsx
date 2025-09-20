@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { trpc } from '~/utils/trpc';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
 }) => {
   const [title, setTitle] = useState<string>('');
   const [searchID, setSearchID] = useState<string>('');
+  const utils = trpc.useUtils();
 
   if (!isOpen) return null;
 
@@ -36,9 +38,37 @@ const UploadModal: React.FC<UploadModalProps> = ({
     onClose();
   };
 
-  const updateSearchID = (input: string) => {
+  const updateSearchID = async (input: string) => {
     setSearchID(input);
-  }
+    if (input.length !== 10 && input.length !== 13) {
+      return;
+    }
+    try {
+      const data = await utils.books.searchID.fetch(input);
+      if (!data.success) {
+        // WIP
+      }
+      if (!data.title) {
+        // WIP
+      }
+      // alert(data.message)
+      setTitle(data.title);
+    } catch {
+      // WIP
+    }
+  };
+
+  const handleSearchIDPaste = async (
+    e: React.ClipboardEvent<HTMLInputElement>,
+  ) => {
+    const pastedText = e.clipboardData.getData('text');
+    const trimmedText = pastedText.trim();
+
+    // Let the default paste behavior happen first
+    setTimeout(() => {
+      updateSearchID(trimmedText);
+    }, 0);
+  };
 
   const fileName = files && files.length > 0 ? files[0].name : '';
   const isMultiple = files && files.length > 1;
@@ -65,13 +95,14 @@ const UploadModal: React.FC<UploadModalProps> = ({
                 htmlFor="title"
                 className="block text-sm text-gray-400 mb-2"
               >
-                ISBN/OpenLibrary Work ID:
+                ISBN/OpenLibrary Work ID (Optional):
               </label>
               <input
                 type="text"
                 id="title"
                 value={searchID}
                 onChange={(e) => updateSearchID(e.target.value)}
+                onPaste={handleSearchIDPaste}
                 placeholder="140566438X/9781405664387/OL102749W"
                 disabled={uploading}
                 className="w-full px-3 py-2 bg-pocket-field border border-pocket-blue rounded-xl outline-none focus:outline-none text-white placeholder-gray-500 disabled:opacity-50"

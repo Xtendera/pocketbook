@@ -148,7 +148,9 @@ const LoginPage: NextPageWithLayout<LoginPageProps> = ({ config }) => {
 
 export default LoginPage;
 
-export const getServerSideProps: GetServerSideProps<LoginPageProps> = async () => {
+export const getServerSideProps: GetServerSideProps<
+  LoginPageProps
+> = async () => {
   const appConfig = {
     isDemoMode: process.env.DEMO === 'true',
   };
@@ -156,7 +158,7 @@ export const getServerSideProps: GetServerSideProps<LoginPageProps> = async () =
   return {
     props: {
       config: appConfig,
-    }
+    },
   };
 };
 

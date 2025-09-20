@@ -56,6 +56,14 @@ export type BookList = {
   cover: string;
 };
 
+const headers = new Headers({
+  'User-Agent': 'PocketBook/1.0 (geektraindev@gmail.com)',
+});
+
+const olSchema = z.object({
+  title: z.string(),
+});
+
 export const booksRouter = router({
   list: protectedProcedure.query(async (): Promise<BookList[]> => {
     const books = await prisma.book.findMany();
@@ -159,13 +167,58 @@ export const booksRouter = router({
     .input(z.string().nonempty().min(9).max(13))
     .query(async ({ input }) => {
       if (
-        input.length === 9 &&
+        input.length === 10 &&
         input.slice(0, 2) === 'OL' &&
         input.slice(-1) === 'W'
       ) {
         // OpenLibrary ID
+        const dataRaw = await fetch(
+          `https://openlibrary.org/works/${input}.json`,
+          {
+            method: 'GET',
+            headers: headers,
+          },
+        );
+
+        if (!dataRaw.ok) {
+          return {
+            success: false,
+            message: `HTTP error: ${dataRaw.status} ${dataRaw.statusText}`,
+            title: '',
+            desc: '',
+          };
+        }
+
+        const jsonData = await dataRaw.json();
+        const data = olSchema.safeParse(jsonData);
+        if (!data.success) {
+          return {
+            success: false,
+            message: 'Invalid response format from OpenLibrary API',
+            title: '',
+            desc: '',
+          };
+        }
+        return {
+          success: true,
+          message: '',
+          title: data.data.title,
+        };
       } else if (input.length === 13 || input.length === 10) {
         // ISBN ID (Currently API-Bricked)
+        return {
+          success: false,
+          message: 'Unsupported ID type!',
+          title: '',
+          desc: '',
+        };
+      } else {
+        return {
+          success: false,
+          message: 'Invalid ID!',
+          title: '',
+          desc: '',
+        };
       }
     }),
 });

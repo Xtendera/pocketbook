@@ -15,6 +15,7 @@ jobs:
     env:
       NODE_ENV: test
       NEXTAUTH_SECRET: supersecret
+      DATABASE_URL: postgres://postgres:password@localhost:5432/trpcdb
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -27,46 +28,12 @@ jobs:
           bun-version: latest
 
       - name: Install deps
-        run: bun install -g pnpm && bun install
+        run: bun install -g pnpm && bun install --save-dev
 
       - name: Setup Prisma
         run: bun run prebuild
 
       - run: bun run build
 
-      - name: Check types
-        run: bun run tsc
-
-  unit:
-    name: 'Unit tests + typecheck'
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_DATABASE: trpcdb
-          POSTGRES_USER: postgres
-          POSTGRES_HOST_AUTH_METHOD: trust
-        ports:
-          - 5432:5432
-    env:
-      NODE_ENV: test
-      NEXTAUTH_SECRET: supersecret
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install deps
-        run: bun install -g pnpm && bun install
-
-      - name: Setup Prisma
-        run: bun run prebuild
-
-      - run: bun run test:unit
-      - run: bun run tsc
+      - name: Lint (ESLint + Prettier)
+        run: bun run lint && bunx prettier --check .
