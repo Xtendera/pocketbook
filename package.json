@@ -14,7 +14,7 @@
     "dev": "bun run dx:next",
     "prebuild": "run-s generate migrate",
     "build": "next build",
-    "start": "next start",
+    "start": "bun run migrate && next start",
     "lint": "eslint --cache src",
     "lint-fix": "bun run lint --fix",
     "migrate-dev": "prisma migrate dev",
