@@ -13,6 +13,7 @@ generator client {
 model Book {
   uuid            String         @id @default(uuid())
   title           String
+  blobUrl         String?
   authorizedUsers User[]         @relation("BookAccess")
   progress        BookProgress[]
 }

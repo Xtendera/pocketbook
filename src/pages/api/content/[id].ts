@@ -8,7 +8,7 @@ async function authenticateUser(req: NextApiRequest): Promise<string | null> {
   const cookies = req.headers.cookie;
   if (!cookies) return null;
 
-  const jwtMatch = cookies.match(/jwt=([^;]+)/);
+  const jwtMatch = cookies.match(/(?:^|; )jwt=([^;]+)/);
   if (!jwtMatch) return null;
 
   const token = jwtMatch[1];
@@ -46,7 +46,6 @@ export default async function handler(
 
     // Extract UUID from the filename (remove .epub extension if present)
     let bookId = id;
-    console.log(bookId);
     if (typeof id === 'string' && id.endsWith('.epub')) {
       bookId = id.slice(0, -5); // Remove .epub extension
     }
@@ -69,29 +68,52 @@ export default async function handler(
       });
     }
 
-    const filePath = path.join(process.cwd(), 'books', `${bookId}.epub`);
+    // Check if we should use Vercel Blob storage
+    if (process.env.BLOB_READ_WRITE_TOKEN && book.blobUrl) {
+      // Fetch the file from Vercel Blob storage
+      const response = await fetch(book.blobUrl);
 
-    try {
-      await fs.access(filePath);
-    } catch {
-      return res.status(404).json({
-        success: false,
-        message: 'Book not found.' + bookId,
-      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch file from blob storage');
+      }
+
+      const fileBuffer = await response.arrayBuffer();
+
+      res.setHeader('Content-Type', 'application/epub+zip');
+      res.setHeader('Content-Length', fileBuffer.byteLength.toString());
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${book.title}.epub"`,
+      );
+      res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+
+      return res.send(Buffer.from(fileBuffer));
+    } else {
+      // Use normal file storage
+      const filePath = path.join(process.cwd(), 'books', `${bookId}.epub`);
+
+      try {
+        await fs.access(filePath);
+      } catch {
+        return res.status(404).json({
+          success: false,
+          message: 'Book not found.' + bookId,
+        });
+      }
+
+      const stats = await fs.stat(filePath);
+
+      res.setHeader('Content-Type', 'application/epub+zip');
+      res.setHeader('Content-Length', stats.size.toString());
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${book.title}.epub"`,
+      );
+      res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+
+      const fileBuffer = await fs.readFile(filePath);
+      return res.send(fileBuffer);
     }
-
-    const stats = await fs.stat(filePath);
-
-    res.setHeader('Content-Type', 'application/epub+zip');
-    res.setHeader('Content-Length', stats.size.toString());
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="${book.title}.epub"`,
-    );
-    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
-
-    const fileBuffer = await fs.readFile(filePath);
-    return res.send(fileBuffer);
   } catch (error) {
     console.error('Error serving EPUB file:', error);
     return res.status(500).json({

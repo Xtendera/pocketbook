@@ -4,6 +4,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { extractTokenBody } from '../../utils/jwt';
 import { prisma } from '../../server/prisma';
+import { put } from '@vercel/blob';
 
 export const config = {
   api: {
@@ -16,6 +17,7 @@ type BookData = {
   title: string;
   originalFilename: string;
   filepath: string;
+  blobUrl?: string;
   size: number;
 };
 
@@ -40,7 +42,7 @@ async function authenticateUser(req: NextApiRequest): Promise<string | null> {
   const cookies = req.headers.cookie;
   if (!cookies) return null;
 
-  const jwtMatch = cookies.match(/jwt=([^;]+)/);
+  const jwtMatch = cookies.match(/(?:^|; )jwt=([^;]+)/);
   if (!jwtMatch) return null;
 
   const token = jwtMatch[1];
@@ -126,37 +128,88 @@ export default async function handler(
           try {
             const title = customTitle.trim();
             let book;
-            if (access) {
-              book = await prisma.book.create({
-                data: {
-                  title,
-                  authorizedUsers: {
-                    connect: {
-                      uuid: userUuid,
+
+            // Check if we should use Vercel Blob storage
+            if (process.env.BLOB_READ_WRITE_TOKEN) {
+              const fileBuffer = await fs.readFile(file.filepath);
+
+              // Upload to Vercel Blob
+              const blob = await put(
+                `${Date.now()}-${file.originalFilename}`,
+                fileBuffer,
+                {
+                  access: 'public',
+                  contentType: file.mimetype || 'application/epub+zip',
+                },
+              );
+
+              if (access) {
+                book = await prisma.book.create({
+                  data: {
+                    title,
+                    blobUrl: blob.url,
+                    authorizedUsers: {
+                      connect: {
+                        uuid: userUuid,
+                      },
                     },
                   },
-                },
+                });
+              } else {
+                book = await prisma.book.create({
+                  data: {
+                    title,
+                    blobUrl: blob.url,
+                  },
+                });
+              }
+
+              // Clean up the temporary file
+              await fs.unlink(file.filepath);
+
+              uploadedBooks.push({
+                uuid: book.uuid,
+                title: book.title,
+                originalFilename: file.originalFilename || 'unknown.epub',
+                filepath: '', // No local filepath when using blob storage
+                blobUrl: blob.url,
+                size: file.size,
               });
             } else {
-              book = await prisma.book.create({
-                data: {
-                  title,
-                },
+              // Use normal file storage
+              if (access) {
+                book = await prisma.book.create({
+                  data: {
+                    title,
+                    authorizedUsers: {
+                      connect: {
+                        uuid: userUuid,
+                      },
+                    },
+                  },
+                });
+              } else {
+                book = await prisma.book.create({
+                  data: {
+                    title,
+                  },
+                });
+              }
+
+              const newFilepath = path.join(UPLOAD_DIR, `${book.uuid}.epub`);
+              await fs.rename(file.filepath, newFilepath);
+
+              uploadedBooks.push({
+                uuid: book.uuid,
+                title: book.title,
+                originalFilename: file.originalFilename || 'unknown.epub',
+                filepath: newFilepath,
+                size: file.size,
               });
             }
-
-            const newFilepath = path.join(UPLOAD_DIR, `${book.uuid}.epub`);
-            await fs.rename(file.filepath, newFilepath);
-
-            uploadedBooks.push({
-              uuid: book.uuid,
-              title: book.title,
-              originalFilename: file.originalFilename || 'unknown.epub',
-              filepath: newFilepath,
-              size: file.size,
-            });
-          } catch {
+          } catch (error) {
             await fs.unlink(file.filepath);
+            console.error('Error processing file:', error);
             continue;
           }
         }
