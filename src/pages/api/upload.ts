@@ -84,17 +84,11 @@ export default async function handler(
     await ensureUploadDir();
 
     const form = formidable({
-      uploadDir: UPLOAD_DIR,
       keepExtensions: true,
       maxFileSize: 100 * 1024 * 1024,
       maxFiles: 5,
       filter: ({ mimetype, originalFilename }) => {
         return isEpubFile(originalFilename || '', mimetype || '');
-      },
-      filename: (name, ext) => {
-        const timestamp = Date.now();
-        const random = Math.random().toString(36).substring(2);
-        return `temp-${timestamp}-${random}${ext}`;
       },
     });
 
