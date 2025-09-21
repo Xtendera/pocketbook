@@ -51,7 +51,7 @@ async function authenticateUser(req: NextApiRequest): Promise<string | null> {
   const expirationTime = body.iat * 1000 + week;
   if (Date.now() > expirationTime) return null;
 
-  return body.user;
+  return body.sub;
 }
 
 function isEpubFile(filename: string, mimetype?: string): boolean {
@@ -102,6 +102,10 @@ export default async function handler(
       ? fields.title[0]
       : fields.title;
 
+    const access = Array.isArray(fields.isPrivate)
+      ? fields.isPrivate[0] === 'true'
+      : fields.isPrivate === 'true';
+
     if (!customTitle || !customTitle.trim()) {
       return res.status(400).json({
         success: false,
@@ -121,12 +125,25 @@ export default async function handler(
 
           try {
             const title = customTitle.trim();
-
-            const book = await prisma.book.create({
-              data: {
-                title,
-              },
-            });
+            let book;
+            if (access) {
+              book = await prisma.book.create({
+                data: {
+                  title,
+                  authorizedUsers: {
+                    connect: {
+                      uuid: userUuid,
+                    },
+                  },
+                },
+              });
+            } else {
+              book = await prisma.book.create({
+                data: {
+                  title,
+                },
+              });
+            }
 
             const newFilepath = path.join(UPLOAD_DIR, `${book.uuid}.epub`);
             await fs.rename(file.filepath, newFilepath);

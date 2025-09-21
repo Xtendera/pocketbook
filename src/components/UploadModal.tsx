@@ -4,7 +4,7 @@ import { trpc } from '~/utils/trpc';
 interface UploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpload: (title: string, files: FileList) => void;
+  onUpload: (isPrivate: boolean, title: string, files: FileList) => void;
   files: FileList | null;
   uploading: boolean;
 }
@@ -19,6 +19,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
   const [title, setTitle] = useState<string>('');
   const [searchID, setSearchID] = useState<string>('');
   const [searchError, setSearchError] = useState<string>('');
+  const [isPrivate, setIsPrivate] = useState<boolean>(false);
   const utils = trpc.useUtils();
 
   if (!isOpen) return null;
@@ -30,7 +31,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
       alert('Please enter a title for the book');
       return;
     }
-    onUpload(title.trim(), files);
+    onUpload(isPrivate, title.trim(), files);
   };
 
   const handleClose = () => {
@@ -96,21 +97,20 @@ const UploadModal: React.FC<UploadModalProps> = ({
           >
             <div>
               <label
-                htmlFor="title"
+                htmlFor="searchId"
                 className="block text-sm text-gray-400 mb-2"
               >
                 ISBN/OpenLibrary Work ID (Optional):
               </label>
               <input
                 type="text"
-                id="title"
+                id="searchId"
                 value={searchID}
                 onChange={(e) => updateSearchID(e.target.value)}
                 onPaste={handleSearchIDPaste}
                 placeholder="140566438X/9781405664387/OL102749W"
                 disabled={uploading}
                 className={`w-full px-3 py-2 bg-pocket-field border rounded-xl outline-none focus:outline-none ${searchError ? 'border-red-500' : 'border-pocket-blue'} text-white placeholder-gray-500 disabled:opacity-50`}
-                autoFocus
               />
               {searchError && (
                 <span className="text-sm text-red-500">{searchError}</span>
@@ -133,7 +133,22 @@ const UploadModal: React.FC<UploadModalProps> = ({
                 className="w-full px-3 py-2 bg-pocket-field border border-pocket-blue rounded-xl outline-none focus:outline-none text-white placeholder-gray-500 disabled:opacity-50"
               />
             </div>
-
+            <div className="flex items-center justify-between">
+              <label htmlFor="access" className="text-sm text-gray-400">
+                Private:
+              </label>
+              <button
+                type="button"
+                id="access"
+                disabled={uploading}
+                className={`relative inline-flex h-6 w-11 items-center disabled:cursor-auto cursor-pointer rounded-full transition-colors focus:ring-offset-[#17171d] ${isPrivate ? 'bg-pocket-blue' : 'bg-gray-600'}`}
+                onClick={() => setIsPrivate(!isPrivate)}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isPrivate ? 'translate-x-6' : 'translate-x-1'}`}
+                />
+              </button>
+            </div>
             <div className="flex space-x-3">
               <button
                 type="button"

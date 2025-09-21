@@ -65,8 +65,25 @@ const olSchema = z.object({
 });
 
 export const booksRouter = router({
-  list: protectedProcedure.query(async (): Promise<BookList[]> => {
-    const books = await prisma.book.findMany();
+  list: protectedProcedure.query(async ({ ctx }): Promise<BookList[]> => {
+    const books = await prisma.book.findMany({
+      where: {
+        OR: [
+          {
+            authorizedUsers: {
+              none: {},
+            },
+          },
+          {
+            authorizedUsers: {
+              some: {
+                uuid: ctx.userId,
+              },
+            },
+          },
+        ],
+      },
+    });
     const coveredBooks: BookList[] = await Promise.all(
       books.map(async (item) => {
         const bookPath = path.join(process.cwd(), 'books', `${item.uuid}.epub`);
@@ -80,21 +97,6 @@ export const booksRouter = router({
     );
     return coveredBooks;
   }),
-  cover: protectedProcedure
-    .input(
-      z.object({
-        bookID: z.string().nonempty(),
-      }),
-    )
-    .query(async ({ input }) => {
-      const bookPath = path.join(
-        process.cwd(),
-        'books',
-        `${input.bookID}.epub`,
-      );
-      const cover = await getEpubCoverBase64(bookPath);
-      return { cover };
-    }),
   progress: protectedProcedure
     .input(
       z.object({

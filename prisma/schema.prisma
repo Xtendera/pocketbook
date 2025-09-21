@@ -11,17 +11,19 @@ generator client {
 }
 
 model Book {
-  uuid     String         @id @default(uuid())
-  title    String
-  progress BookProgress[]
+  uuid            String         @id @default(uuid())
+  title           String
+  authorizedUsers User[]         @relation("BookAccess")
+  progress        BookProgress[]
 }
 
 model User {
-  uuid         String         @id @default(uuid())
-  username     String         @unique
-  passwordHash String
-  permission   Int
-  bookProgress BookProgress[]
+  uuid            String         @id @default(uuid())
+  username        String         @unique
+  passwordHash    String
+  permission      Int
+  accessibleBooks Book[]         @relation("BookAccess")
+  bookProgress    BookProgress[]
 }
 
 model BookProgress {

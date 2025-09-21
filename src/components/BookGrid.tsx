@@ -37,9 +37,12 @@ const BookGrid: React.FC = () => {
     e.target.value = ''; // Reset file input
   };
 
-  const handleUpload = async (title: string, files: FileList) => {
+  const handleUpload = async (
+    isPrivate: boolean,
+    title: string,
+    files: FileList,
+  ) => {
     setUploading(true);
-
     try {
       const formData = new FormData();
 
@@ -48,6 +51,7 @@ const BookGrid: React.FC = () => {
       }
 
       formData.append('title', title);
+      formData.append('isPrivate', isPrivate ? 'true' : 'false');
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -138,7 +142,7 @@ const BookGrid: React.FC = () => {
               onClick={() => handleBookRead(item)}
               className="w-full h-full hover:cursor-pointer object-cover transition-all duration-400 rounded-xl hover:rounded-none shadow-md"
             />
-            <span className="opacity-0 group-hover:opacity-100 absolute inset-x-0 bottom-0 text-center bg-black/50 text-white p-2 rounded-b-xl transition-opacity duration-300 ease-in-out">
+            <span className="opacity-0 group-hover:opacity-100 absolute inset-x-0 bottom-0 text-center bg-black/50 text-white p-2 rounded-b-xl group-hover:rounded-b-none transition-opacity duration-300 ease-in-out">
               {item.title}
             </span>
           </div>
