@@ -134,15 +134,15 @@ const BookGrid: React.FC = () => {
       {books?.map((item) => {
         const cover = item.cover;
         return (
-          <div className="relative size-auto group">
+          <div className="relative size-auto group overflow-hidden transition-all duration-400 rounded-2xl hover:rounded-none">
             <img
               key={item.uuid}
               src={cover || '/example2.jpg'}
               alt={item.title}
               onClick={() => handleBookRead(item)}
-              className="w-full h-full hover:cursor-pointer object-cover transition-all duration-400 rounded-xl hover:rounded-none shadow-md"
+              className="w-full h-full hover:cursor-pointer object-cover shadow-md"
             />
-            <span className="opacity-0 group-hover:opacity-100 absolute inset-x-0 bottom-0 text-center bg-black/50 text-white p-2 rounded-b-xl group-hover:rounded-b-none transition-opacity duration-300 ease-in-out">
+            <span className="opacity-0 group-hover:opacity-100 absolute inset-x-0 bottom-0 text-center bg-black/50 text-white p-2 transition-opacity duration-400 ease-in-out pointer-events-none select-none">
               {item.title}
             </span>
           </div>
