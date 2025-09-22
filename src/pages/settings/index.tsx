@@ -5,6 +5,7 @@ import Loading from '~/components/Loading';
 import { GetServerSideProps } from 'next';
 import { useState } from 'react';
 import ResetModal from '~/components/ResetModal';
+import Footer from '~/components/Footer';
 
 interface SettingsPageProps {
   config: {
@@ -62,10 +63,10 @@ const SettingsPage: NextPageWithLayout<SettingsPageProps> = ({ config }) => {
   }
 
   return (
-    <div className="min-h-screen mx-8">
+    <div className="flex flex-col h-screen mx-8">
       <Nav />
       <ResetModal isOpen={resetModal} onClose={onClose} />
-      <div className="mt-2 grid grid-cols-1">
+      <div className="mt-2 flex-1 flex flex-col">
         <span className="text-xl">Username: {userInfo?.username}</span>
         <span className="text-xl">
           Password: ****
@@ -86,6 +87,7 @@ const SettingsPage: NextPageWithLayout<SettingsPageProps> = ({ config }) => {
           )}
         </span>
       </div>
+      <Footer />
     </div>
   );
 };

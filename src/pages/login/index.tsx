@@ -4,6 +4,7 @@ import type { NextPageWithLayout } from '../_app';
 import type { GetServerSideProps } from 'next';
 import { trpc } from '~/utils/trpc';
 import { useRouter } from 'next/router';
+import Footer from '~/components/Footer';
 // import type { inferProcedureInput } from '@trpc/server';
 // import Link from 'next/link';
 // import { Fragment } from 'react';
@@ -92,7 +93,7 @@ const LoginPage: NextPageWithLayout<LoginPageProps> = ({ config }) => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex flex-col h-screen mx-8">
       <div className="flex-1 flex items-center justify-center">
         <div className="flex flex-col items-center space-y-6">
           <h2 className="text-4xl">Login</h2>
@@ -142,6 +143,7 @@ const LoginPage: NextPageWithLayout<LoginPageProps> = ({ config }) => {
           </form>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
