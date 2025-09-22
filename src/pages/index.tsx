@@ -23,7 +23,7 @@ const IndexPage: NextPageWithLayout<MainPageProps> = ({ config }) => {
   }, [config.isDemoMode]);
 
   return (
-    <div className="flex flex-col h-screen mx-8 justify-between">
+    <div className="flex flex-col h-screen mx-8">
       <Nav />
       <div className="flex-1">
         <div>
@@ -36,30 +36,32 @@ const IndexPage: NextPageWithLayout<MainPageProps> = ({ config }) => {
         {/* Demo Warning Popup */}
         {showDemoWarning && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 max-w-md mx-4 shadow-xl">
-              <h3 className="text-xl font-semibold text-red-600 mb-4">
-                Demo Environment Notice
-              </h3>
-              <div className="space-y-3 text-gray-700">
-                <div className="flex items-start space-x-2">
-                  <span className="text-red-500 font-bold">•</span>
-                  <span>Don't upload pirated material.</span>
+            <div className="bg-[#17171d] border border-pocket-blue rounded-xl p-8 w-96 max-w-[90vw]">
+              <div className="flex flex-col items-center space-y-6">
+                <h3 className="text-2xl text-white font-semibold">
+                  Demo Environment Notice
+                </h3>
+                <div className="space-y-3 text-gray-400 w-full">
+                  <div className="flex items-start space-x-3">
+                    <span className="text-red-400 font-bold text-lg">•</span>
+                    <span>Don't upload pirated material.</span>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="text-red-400 font-bold text-lg">•</span>
+                    <span>Don't upload excessively.</span>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="text-red-400 font-bold text-lg">•</span>
+                    <span>Files may be wiped periodically.</span>
+                  </div>
                 </div>
-                <div className="flex items-start space-x-2">
-                  <span className="text-red-500 font-bold">•</span>
-                  <span>Don't upload excessively.</span>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <span className="text-red-500 font-bold">•</span>
-                  <span>Files may be wiped periodically.</span>
-                </div>
+                <button
+                  onClick={() => setShowDemoWarning(false)}
+                  className="w-full px-4 py-2 bg-pocket-blue hover:bg-blue-600 text-white rounded-xl cursor-pointer transition-colors"
+                >
+                  I Understand
+                </button>
               </div>
-              <button
-                onClick={() => setShowDemoWarning(false)}
-                className="mt-6 w-full bg-pocket-blue text-white py-2 px-4 rounded-xl hover:bg-pocket-blue/90 transition-colors"
-              >
-                I Understand
-              </button>
             </div>
           </div>
         )}
