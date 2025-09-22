@@ -16,6 +16,7 @@ model Book {
   blobUrl         String?
   authorizedUsers User[]         @relation("BookAccess")
   progress        BookProgress[]
+  collections     Collection[]
 }
 
 model User {
@@ -25,6 +26,12 @@ model User {
   permission      Int
   accessibleBooks Book[]         @relation("BookAccess")
   bookProgress    BookProgress[]
+}
+
+model Collection {
+  uuid  String @id @default(uuid())
+  name  String
+  books Book[]
 }
 
 model BookProgress {
