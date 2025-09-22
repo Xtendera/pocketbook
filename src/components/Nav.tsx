@@ -67,7 +67,7 @@ const Nav: React.FC = () => {
 
   function signOut() {
     cookieStore.delete('jwt');
-    router.push('/login');
+    router.reload();
   }
 
   function settings() {
@@ -92,9 +92,12 @@ const Nav: React.FC = () => {
 
   return (
     <div className="flex justify-between">
-      <div className="mt-8 flex items-center">
+      <div className="mt-8 flex items-center space-x-8">
         <Link href="/">
           <h1 className="text-3xl text-center font-medium">Pocket Book</h1>
+        </Link>
+        <Link href="/collections">
+          <span className="text-xl">Collections</span>
         </Link>
       </div>
       <div className="mt-8 flex items-center relative" ref={dropdownRef}>
