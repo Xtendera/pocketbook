@@ -202,6 +202,31 @@ export const booksRouter = router({
     );
     return coveredBooks;
   }),
+  listCollections: protectedProcedure.query(async () => {
+    const collections = await prisma.collection.findMany({
+      select: {
+        uuid: true,
+        name: true,
+        books: {
+          select: {
+            uuid: true,
+            title: true,
+          },
+        },
+      },
+    });
+    if (collections) {
+      return {
+        success: true,
+        collections: collections,
+      };
+    } else {
+      return {
+        success: false,
+        collections: null,
+      };
+    }
+  }),
   progress: protectedProcedure
     .input(
       z.object({

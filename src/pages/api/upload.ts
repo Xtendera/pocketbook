@@ -39,6 +39,7 @@ async function ensureUploadDir() {
 }
 
 async function authenticateUser(req: NextApiRequest): Promise<string | null> {
+  console.log('Shyam says: .ts pmo');
   const cookies = req.headers.cookie;
   if (!cookies) return null;
 
