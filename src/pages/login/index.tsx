@@ -1,10 +1,11 @@
-// import { trpc } from '../utils/trpc';
 import { useState } from 'react';
 import type { NextPageWithLayout } from '../_app';
 import type { GetServerSideProps } from 'next';
 import { trpc } from '~/utils/trpc';
 import { useRouter } from 'next/router';
-import Footer from '~/components/Footer';
+import Footer from '~/components/layout/Footer';
+import Input from '~/components/ui/Input';
+import Button from '~/components/ui/Button';
 // import type { inferProcedureInput } from '@trpc/server';
 // import Link from 'next/link';
 // import { Fragment } from 'react';
@@ -76,11 +77,24 @@ const LoginPage: NextPageWithLayout<LoginPageProps> = ({ config }) => {
     setBtnText('Done!');
 
     const week = 24 * 60 * 60 * 1000 * 7;
-    await cookieStore.set({
-      name: 'jwt',
-      value: await resp.token,
-      expires: Date.now() + week,
-    });
+
+    // Use cookieStore if available, fallback to document.cookie
+    if (typeof cookieStore !== 'undefined') {
+      try {
+        await cookieStore.set({
+          name: 'jwt',
+          value: await resp.token,
+          expires: Date.now() + week,
+        });
+      } catch {
+        const expires = new Date(Date.now() + week).toUTCString();
+        document.cookie = `jwt=${await resp.token}; expires=${expires}; path=/; SameSite=Lax`;
+      }
+    } else {
+      const expires = new Date(Date.now() + week).toUTCString();
+      document.cookie = `jwt=${await resp.token}; expires=${expires}; path=/; SameSite=Lax`;
+    }
+
     router.push('/');
   }
 
@@ -118,28 +132,23 @@ const LoginPage: NextPageWithLayout<LoginPageProps> = ({ config }) => {
             className="flex flex-col space-y-4 w-64"
             onSubmit={handleSubmit}
           >
-            <input
+            <Input
               type="text"
               name="username"
               onChange={userChange}
-              id="user_text"
               placeholder="Username"
-              className="px-3 py-2 bg-pocket-field border border-pocket-blue rounded-xl outline-hidden focus:outline-hidden"
+              className="outline-hidden focus:outline-hidden"
             />
-            <input
+            <Input
               type="password"
               name="password"
               onChange={passChange}
-              id="pass_text"
               placeholder="Password"
-              className="px-3 py-2 bg-pocket-field border border-pocket-blue rounded-xl outline-hidden focus:outline-hidden"
+              className="outline-hidden focus:outline-hidden"
             />
-            <input
-              type="submit"
-              value={btnText}
-              disabled={!btnOn}
-              className="px-4 py-2 bg-pocket-blue disabled:bg-pocket-disabled disabled:cursor-default text-white rounded-xl cursor-pointer"
-            />
+            <Button type="submit" disabled={!btnOn}>
+              {btnText}
+            </Button>
           </form>
         </div>
       </div>
