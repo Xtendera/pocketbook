@@ -15,7 +15,7 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseClasses =
-    'rounded-xl cursor-pointer transition-colors focus:outline-none';
+    'rounded-xl cursor-pointer transition-colors duration-500 focus:outline-none';
 
   const variantClasses = {
     primary:
