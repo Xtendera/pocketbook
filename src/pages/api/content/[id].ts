@@ -3,15 +3,14 @@ import fs from 'fs/promises';
 import path from 'path';
 import { prisma } from '../../../server/prisma';
 import { extractTokenBody } from '../../../utils/jwt';
+import { parseJwtFromCookieString } from '../../../utils/cookies';
 
 async function authenticateUser(req: NextApiRequest): Promise<string | null> {
   const cookies = req.headers.cookie;
-  if (!cookies) return null;
 
-  const jwtMatch = cookies.match(/(?:^|; )jwt=([^;]+)/);
-  if (!jwtMatch) return null;
+  const token = parseJwtFromCookieString(cookies);
+  if (!token) return null;
 
-  const token = jwtMatch[1];
   const body = await extractTokenBody(token);
   if (!body) return null;
 

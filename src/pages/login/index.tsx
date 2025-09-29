@@ -6,10 +6,7 @@ import { useRouter } from 'next/router';
 import Footer from '~/components/layout/Footer';
 import Input from '~/components/ui/Input';
 import Button from '~/components/ui/Button';
-// import type { inferProcedureInput } from '@trpc/server';
-// import Link from 'next/link';
-// import { Fragment } from 'react';
-// import type { AppRouter } from '~/server/routers/_app';
+import { setJwtToken } from '~/utils/cookies';
 
 interface LoginPageProps {
   config: {
@@ -19,31 +16,6 @@ interface LoginPageProps {
 
 const LoginPage: NextPageWithLayout<LoginPageProps> = ({ config }) => {
   const utils = trpc.useUtils(); // Gets the tRPC object with all of the remote calls from the server
-  // const postsQuery = trpc.post.list.useInfiniteQuery(
-  //   {
-  //     limit: 5,
-  //   },
-  //   {
-  //     getNextPageParam(lastPage) {
-  //       return lastPage.nextCursor;
-  //     },
-  //   },
-  // );
-
-  // const addPost = trpc.post.add.useMutation({
-  //   async onSuccess() {
-  //     // refetches posts after a post is added
-  //     await utils.post.list.invalidate();
-  //   },
-  // });
-
-  // prefetch all posts for instant navigation
-  // useEffect(() => {
-  //   const allPosts = postsQuery.data?.pages.flatMap((page) => page.items) ?? [];
-  //   for (const { id } of allPosts) {
-  //     void utils.post.byId.prefetch({ id });
-  //   }
-  // }, [postsQuery.data, utils]);
 
   const router = useRouter();
 
@@ -76,24 +48,8 @@ const LoginPage: NextPageWithLayout<LoginPageProps> = ({ config }) => {
     }
     setBtnText('Done!');
 
-    const week = 24 * 60 * 60 * 1000 * 7;
-
-    // Use cookieStore if available, fallback to document.cookie
-    if (typeof cookieStore !== 'undefined') {
-      try {
-        await cookieStore.set({
-          name: 'jwt',
-          value: await resp.token,
-          expires: Date.now() + week,
-        });
-      } catch {
-        const expires = new Date(Date.now() + week).toUTCString();
-        document.cookie = `jwt=${await resp.token}; expires=${expires}; path=/; SameSite=Lax`;
-      }
-    } else {
-      const expires = new Date(Date.now() + week).toUTCString();
-      document.cookie = `jwt=${await resp.token}; expires=${expires}; path=/; SameSite=Lax`;
-    }
+    // Set JWT token using cookie utility (7 days expiration)
+    setJwtToken(await resp.token);
 
     router.push('/');
   }
@@ -172,29 +128,3 @@ export const getServerSideProps: GetServerSideProps<
     },
   };
 };
-
-/**
- * If you want to statically render this page
- * - Export `appRouter` & `createContext` from [trpc].ts
- * - Make the `opts` object optional on `createContext()`
- *
- * @see https://trpc.io/docs/v11/ssg
- */
-// export const getStaticProps = async (
-//   context: GetStaticPropsContext<{ filter: string }>,
-// ) => {
-//   const ssg = createServerSideHelpers({
-//     router: appRouter,
-//     ctx: await createContext(),
-//   });
-//
-//   await ssg.post.all.fetch();
-//
-//   return {
-//     props: {
-//       trpcState: ssg.dehydrate(),
-//       filter: context.params?.filter ?? 'all',
-//     },
-//     revalidate: 1,
-//   };
-// };
