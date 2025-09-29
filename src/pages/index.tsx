@@ -6,6 +6,7 @@ import Modal from '~/components/ui/Modal';
 import Button from '~/components/ui/Button';
 import { GetServerSideProps } from 'next';
 import Footer from '~/components/layout/Footer';
+import { isDemoWarningAccepted, setDemoWarningAccepted } from '~/utils/cookies';
 
 const BookGrid = lazy(() => import('../components/grids/BookGrid'));
 
@@ -19,7 +20,7 @@ const IndexPage: NextPageWithLayout<MainPageProps> = ({ config }) => {
   const [showDemoWarning, setShowDemoWarning] = useState(false);
 
   useEffect(() => {
-    if (config.isDemoMode) {
+    if (config.isDemoMode && !isDemoWarningAccepted()) {
       setShowDemoWarning(true);
     }
   }, [config.isDemoMode]);
@@ -53,7 +54,10 @@ const IndexPage: NextPageWithLayout<MainPageProps> = ({ config }) => {
               </div>
             </div>
             <Button
-              onClick={() => setShowDemoWarning(false)}
+              onClick={() => {
+                setDemoWarningAccepted();
+                setShowDemoWarning(false);
+              }}
               className="w-full"
             >
               I Understand

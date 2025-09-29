@@ -3,6 +3,7 @@ import formidable from 'formidable';
 import fs from 'fs/promises';
 import path from 'path';
 import { extractTokenBody } from '../../utils/jwt';
+import { parseJwtFromCookieString } from '../../utils/cookies';
 import { prisma } from '../../server/prisma';
 import { put } from '@vercel/blob';
 
@@ -39,14 +40,11 @@ async function ensureUploadDir() {
 }
 
 async function authenticateUser(req: NextApiRequest): Promise<string | null> {
-  console.log('Shyam says: .ts pmo');
   const cookies = req.headers.cookie;
-  if (!cookies) return null;
 
-  const jwtMatch = cookies.match(/(?:^|; )jwt=([^;]+)/);
-  if (!jwtMatch) return null;
+  const token = parseJwtFromCookieString(cookies);
+  if (!token) return null;
 
-  const token = jwtMatch[1];
   const body = await extractTokenBody(token);
   if (!body) return null;
 
