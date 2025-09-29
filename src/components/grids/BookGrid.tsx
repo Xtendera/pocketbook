@@ -163,7 +163,7 @@ const BookGrid: React.FC<BookGridProps> = ({
           >
             <img
               key={item.uuid}
-              src={cover || '/placeholder.jpg'}
+              src={cover || '/placeholder.png'}
               alt={item.title}
               onClick={
                 selection
