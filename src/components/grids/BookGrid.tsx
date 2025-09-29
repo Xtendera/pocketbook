@@ -1,11 +1,23 @@
 import { useRef, useState } from 'react';
 import { trpc } from '~/utils/trpc';
-import Loading from './Loading';
-import UploadModal from './UploadModal';
+import Loading from '../ui/Loading';
+import UploadModal from '../modals/UploadModal';
+import AddCircleIcon from '../icons/AddCircleIcon';
 import { useRouter } from 'next/router';
 import type { RouterOutput } from '~/utils/trpc';
+import { CheckIcon } from '../icons';
 
-const BookGrid: React.FC = () => {
+interface BookGridProps {
+  selection?: boolean;
+  selectedBooks?: string[];
+  setSelectedBooks?: (selected: string[]) => void;
+}
+
+const BookGrid: React.FC<BookGridProps> = ({
+  selection,
+  selectedBooks,
+  setSelectedBooks,
+}) => {
   const utils = trpc.useUtils();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -121,48 +133,65 @@ const BookGrid: React.FC = () => {
         uploading={uploading}
       />
 
-      <div
-        className={`w-full h-full transition-all duration-400 border-gray-600 hover:border-gray-400 border-dashed border-4 flex items-center justify-center cursor-pointer group ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
-        onClick={uploading ? undefined : handlePlusClick}
-      >
+      {!selection && (
         <div
-          className={`transition-all duration-400 fill-gray-600 group-hover:fill-gray-400 ${uploading ? 'animate-spin' : ''}`}
+          className={`w-full h-full transition-all duration-400 border-gray-600 hover:border-gray-400 border-dashed border-4 rounded-2xl flex items-center justify-center cursor-pointer group ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          onClick={uploading ? undefined : handlePlusClick}
         >
-          {uploading ? <Loading /> : add_circle()}
+          <div
+            className={`transition-all duration-400 fill-gray-600 group-hover:fill-gray-400 ${uploading ? 'animate-spin' : ''}`}
+          >
+            {uploading ? (
+              <Loading />
+            ) : (
+              <AddCircleIcon
+                size={32}
+                className="transition-all duration-400 fill-gray-600 group-hover:fill-gray-400"
+              />
+            )}
+          </div>
         </div>
-      </div>
+      )}
       {books?.map((item) => {
         const cover = item.cover;
+        const isSelected = selection && selectedBooks?.includes(item.uuid);
         return (
-          <div className="relative size-auto group overflow-hidden transition-all duration-400 rounded-2xl hover:rounded-none">
+          <div
+            className={`relative size-auto group overflow-hidden transition-all duration-400 rounded-2xl ${
+              selection ? isSelected && 'scale-90' : 'hover:scale-105'
+            }`}
+          >
             <img
               key={item.uuid}
-              src={cover || '/example2.jpg'}
+              src={cover || '/placeholder.png'}
               alt={item.title}
-              onClick={() => handleBookRead(item)}
+              onClick={
+                selection
+                  ? () => {
+                      const currentSelected = selectedBooks || [];
+                      const isSelected = currentSelected.includes(item.uuid);
+                      const newSelected = isSelected
+                        ? currentSelected.filter((id) => id !== item.uuid)
+                        : [...currentSelected, item.uuid];
+                      setSelectedBooks?.(newSelected);
+                    }
+                  : () => handleBookRead(item)
+              }
               className="w-full h-full hover:cursor-pointer object-cover shadow-md"
             />
             <span className="opacity-0 group-hover:opacity-100 absolute inset-x-0 bottom-0 text-center bg-black/50 text-white p-2 transition-opacity duration-400 ease-in-out pointer-events-none select-none">
               {item.title}
             </span>
+            {isSelected && (
+              <div className="absolute top-2 right-2 bg-pocket-blue text-white rounded-full p-1 shadow-lg flex items-center justify-center">
+                <CheckIcon size={24} className="text-white" />
+              </div>
+            )}
           </div>
         );
       })}
     </div>
   );
 };
-
-function add_circle() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      height="32px"
-      viewBox="0 -960 960 960"
-      width="32px"
-    >
-      <path d="M440-280h80v-160h160v-80H520v-160h-80v160H280v80h160v160Zm40 200q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
-    </svg>
-  );
-}
 
 export default BookGrid;

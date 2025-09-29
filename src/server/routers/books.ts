@@ -202,6 +202,31 @@ export const booksRouter = router({
     );
     return coveredBooks;
   }),
+  listCollections: protectedProcedure.query(async () => {
+    const collections = await prisma.collection.findMany({
+      select: {
+        uuid: true,
+        name: true,
+        books: {
+          select: {
+            uuid: true,
+            title: true,
+          },
+        },
+      },
+    });
+    if (collections) {
+      return {
+        success: true,
+        collections: collections,
+      };
+    } else {
+      return {
+        success: false,
+        collections: null,
+      };
+    }
+  }),
   progress: protectedProcedure
     .input(
       z.object({
@@ -270,6 +295,57 @@ export const booksRouter = router({
       progressStr: entry.progressStr,
     }));
   }),
+  getCollection: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      const collection = await prisma.collection.findUnique({
+        where: { uuid: input.id },
+        include: {
+          books: {
+            select: {
+              uuid: true,
+              title: true,
+            },
+          },
+        },
+      });
+
+      if (!collection) {
+        throw new Error('Collection not found');
+      }
+
+      return collection;
+    }),
+  createCollection: protectedProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        bookIds: z.array(z.string()),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const collection = await prisma.collection.create({
+        data: {
+          name: input.name,
+          books: {
+            connect: input.bookIds.map((id) => ({ uuid: id })),
+          },
+        },
+        include: {
+          books: {
+            select: {
+              uuid: true,
+              title: true,
+            },
+          },
+        },
+      });
+
+      return {
+        success: true,
+        collection,
+      };
+    }),
   searchID: protectedProcedure
     .input(z.string().nonempty().min(9).max(13))
     .query(async ({ input }) => {

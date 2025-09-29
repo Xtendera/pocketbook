@@ -1,11 +1,13 @@
 import type { NextPageWithLayout } from './_app';
-import Nav from '~/components/Nav';
+import Nav from '~/components/layout/Nav';
 import { Suspense, lazy, useState, useEffect } from 'react';
-import Loading from '~/components/Loading';
+import Loading from '~/components/ui/Loading';
+import Modal from '~/components/ui/Modal';
+import Button from '~/components/ui/Button';
 import { GetServerSideProps } from 'next';
-import Footer from '~/components/Footer';
+import Footer from '~/components/layout/Footer';
 
-const BookGrid = lazy(() => import('../components/BookGrid'));
+const BookGrid = lazy(() => import('../components/grids/BookGrid'));
 
 interface MainPageProps {
   config: {
@@ -35,35 +37,28 @@ const IndexPage: NextPageWithLayout<MainPageProps> = ({ config }) => {
 
         {/* Demo Warning Popup */}
         {showDemoWarning && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-[#17171d] border border-pocket-blue rounded-xl p-8 w-96 max-w-[90vw]">
-              <div className="flex flex-col items-center space-y-6">
-                <h3 className="text-2xl text-white font-semibold">
-                  Demo Environment Notice
-                </h3>
-                <div className="space-y-3 text-gray-400 w-full">
-                  <div className="flex items-start space-x-3">
-                    <span className="text-red-400 font-bold text-lg">•</span>
-                    <span>Don't upload pirated material.</span>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <span className="text-red-400 font-bold text-lg">•</span>
-                    <span>Don't upload excessively.</span>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <span className="text-red-400 font-bold text-lg">•</span>
-                    <span>Files may be wiped periodically.</span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowDemoWarning(false)}
-                  className="w-full px-4 py-2 bg-pocket-blue hover:bg-blue-600 text-white rounded-xl cursor-pointer transition-colors"
-                >
-                  I Understand
-                </button>
+          <Modal isOpen={showDemoWarning} title="Demo Environment Notice">
+            <div className="space-y-3 text-gray-400 w-full">
+              <div className="flex items-start space-x-3">
+                <span className="text-red-400 font-bold text-lg">•</span>
+                <span>Don't upload pirated material.</span>
+              </div>
+              <div className="flex items-start space-x-3">
+                <span className="text-red-400 font-bold text-lg">•</span>
+                <span>Don't upload excessively.</span>
+              </div>
+              <div className="flex items-start space-x-3">
+                <span className="text-red-400 font-bold text-lg">•</span>
+                <span>Files may be wiped periodically.</span>
               </div>
             </div>
-          </div>
+            <Button
+              onClick={() => setShowDemoWarning(false)}
+              className="w-full"
+            >
+              I Understand
+            </Button>
+          </Modal>
         )}
       </div>
       <Footer />
