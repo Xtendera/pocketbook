@@ -6,6 +6,7 @@ import { extractTokenBody } from '../../utils/jwt';
 import { parseJwtFromCookieString } from '../../utils/cookies';
 import { prisma } from '../../server/prisma';
 import { put } from '@vercel/blob';
+import { randomUUID } from 'crypto';
 
 export const config = {
   api: {
@@ -124,21 +125,20 @@ export default async function handler(
 
             // Check if we should use Vercel Blob storage
             if (process.env.BLOB_READ_WRITE_TOKEN) {
+              // Generate UUID for the book first
+              const bookUuid = randomUUID();
               const fileBuffer = await fs.readFile(file.filepath);
 
-              // Upload to Vercel Blob
-              const blob = await put(
-                `${Date.now()}-${file.originalFilename}`,
-                fileBuffer,
-                {
-                  access: 'public',
-                  contentType: file.mimetype || 'application/epub+zip',
-                },
-              );
+              // Upload to Vercel Blob using UUID
+              const blob = await put(`${bookUuid}.epub`, fileBuffer, {
+                access: 'public',
+                contentType: file.mimetype || 'application/epub+zip',
+              });
 
               if (access) {
                 book = await prisma.book.create({
                   data: {
+                    uuid: bookUuid,
                     title,
                     blobUrl: blob.url,
                     authorizedUsers: {
@@ -151,6 +151,7 @@ export default async function handler(
               } else {
                 book = await prisma.book.create({
                   data: {
+                    uuid: bookUuid,
                     title,
                     blobUrl: blob.url,
                   },
