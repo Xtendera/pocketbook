@@ -176,6 +176,9 @@ export const booksRouter = router({
           },
         ],
       },
+      orderBy: {
+        title: 'asc',
+      },
     });
     const coveredBooks: BookList[] = await Promise.all(
       books.map(async (item) => {
@@ -211,6 +214,9 @@ export const booksRouter = router({
           select: {
             uuid: true,
             title: true,
+          },
+          orderBy: {
+            title: 'asc',
           },
         },
       },
@@ -305,6 +311,9 @@ export const booksRouter = router({
             select: {
               uuid: true,
               title: true,
+            },
+            orderBy: {
+              title: 'asc',
             },
           },
         },
