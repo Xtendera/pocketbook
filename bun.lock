@@ -5,51 +5,55 @@
     "": {
       "name": "pocketbook",
       "dependencies": {
-        "@lingo-reader/epub-parser": "^0.4.1",
-        "@prisma/client": "^6.16.2",
-        "@tanstack/react-query": "^5.89.0",
+        "@lingo-reader/epub-parser": "^0.4.2",
+        "@prisma/client": "^6.19.0",
+        "@tanstack/react-query": "^5.90.9",
         "@trpc/client": "npm:@trpc/client",
         "@trpc/next": "npm:@trpc/next",
         "@trpc/react-query": "npm:@trpc/react-query",
         "@trpc/server": "npm:@trpc/server",
-        "@types/formidable": "^3.4.5",
+        "@types/formidable": "^3.4.6",
         "@types/jszip": "^3.4.1",
         "@vercel/blob": "^2.0.0",
         "argon2": "^0.44.0",
+        "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "epub-parser": "^0.2.5",
         "formidable": "^3.5.4",
         "husky": "^9.1.7",
-        "jose": "^6.1.0",
+        "jose": "^6.1.1",
         "jszip": "^3.10.1",
-        "lint-staged": "^16.1.6",
-        "next": "^15.5.3",
-        "react": "^19.1.1",
-        "react-dom": "^19.1.1",
-        "react-reader": "^2.0.13",
-        "superjson": "^2.2.2",
-        "zod": "^4.1.11",
+        "lint-staged": "^16.2.6",
+        "lucide-react": "^0.553.0",
+        "next": "^15.5.6",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
+        "react-reader": "^2.0.15",
+        "superjson": "^2.2.5",
+        "tailwind-merge": "^3.4.0",
+        "zod": "^4.1.12",
       },
       "devDependencies": {
-        "@playwright/test": "^1.55.0",
-        "@tailwindcss/postcss": "^4.1.13",
-        "@types/node": "^24.5.2",
-        "@types/react": "^19.1.13",
-        "dotenv": "^17.2.2",
-        "eslint": "^9.36.0",
-        "eslint-config-next": "^15.5.3",
+        "@playwright/test": "^1.56.1",
+        "@tailwindcss/postcss": "^4.1.17",
+        "@types/node": "^24.10.1",
+        "@types/react": "^19.2.5",
+        "dotenv": "^17.2.3",
+        "eslint": "^9.39.1",
+        "eslint-config-next": "^15.5.6",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "6.0.0-rc.1",
         "npm-run-all": "^4.1.5",
         "postcss": "^8.5.6",
         "prettier": "3.6.2",
-        "prisma": "^6.16.2",
-        "tailwindcss": "^4.1.13",
-        "tsx": "^4.20.5",
-        "typescript": "^5.9.2",
-        "typescript-eslint": "^8.44.0",
-        "vite": "^7.1.6",
+        "prisma": "^6.19.0",
+        "tailwindcss": "^4.1.17",
+        "tsx": "^4.20.6",
+        "tw-animate-css": "^1.4.0",
+        "typescript": "^5.9.3",
+        "typescript-eslint": "^8.46.4",
+        "vite": "^7.2.2",
         "vitest": "^3.2.4",
       },
     },
@@ -581,6 +585,8 @@
 
     "citty": ["citty@0.1.6", "", { "dependencies": { "consola": "^3.2.3" } }, "sha512-tskPPKEs8D2KPafUypv2gxwJP8h/OaJmC82QQGGDQcHvXX43xF2VDACcJVmZ0EuSxkpO9Kc4MlrA3q0+FG58AQ=="],
 
+    "class-variance-authority": ["class-variance-authority@0.7.1", "", { "dependencies": { "clsx": "^2.1.1" } }, "sha512-Ka+9Trutv7G8M6WT6SeiRWz792K5qEqIGEGzXKhAE6xOWAY6pPH8U+9IY3oCMv6kqTmLsv7Xh/2w2RigkePMsg=="],
+
     "cli-cursor": ["cli-cursor@5.0.0", "", { "dependencies": { "restore-cursor": "^5.0.0" } }, "sha512-aCj4O5wKyszjMmDT4tZj93kxyydN/K5zPWSCe6/0AV/AA1pqe5ZBIw0a2ZfPQV7lL5/yb5HsUreJ6UFAF1tEQw=="],
 
     "cli-truncate": ["cli-truncate@5.1.0", "", { "dependencies": { "slice-ansi": "^7.1.0", "string-width": "^8.0.0" } }, "sha512-7JDGG+4Zp0CsknDCedl0DYdaeOhc46QNpXi3NLQblkZpXXgA6LncLDUUyvrjSvZeF3VRQa+KiMGomazQrC1V8g=="],
@@ -999,6 +1005,8 @@
 
     "lru-cache": ["lru-cache@5.1.1", "", { "dependencies": { "yallist": "^3.0.2" } }, "sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w=="],
 
+    "lucide-react": ["lucide-react@0.553.0", "", { "peerDependencies": { "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-BRgX5zrWmNy/lkVAe0dXBgd7XQdZ3HTf+Hwe3c9WK6dqgnj9h+hxV+MDncM88xDWlCq27+TKvHGE70ViODNILw=="],
+
     "magic-string": ["magic-string@0.30.19", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.5" } }, "sha512-2N21sPY9Ws53PZvsEpVtNuSW+ScYbQdp4b9qUaL+9QkHUrGFKo56Lg9Emg5s9V/qrtNBmiR01sYhUOwu3H+VOw=="],
 
     "marks-pane": ["marks-pane@1.0.9", "", {}, "sha512-Ahs4oeG90tbdPWwAJkAAoHg2lRR8lAs9mZXETNPO9hYg3AkjUJBKi1NQ4aaIQZVGrig7c/3NUV1jANl8rFTeMg=="],
@@ -1277,6 +1285,8 @@
 
     "supports-preserve-symlinks-flag": ["supports-preserve-symlinks-flag@1.0.0", "", {}, "sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w=="],
 
+    "tailwind-merge": ["tailwind-merge@3.4.0", "", {}, "sha512-uSaO4gnW+b3Y2aWoWfFpX62vn2sR3skfhbjsEnaBI81WD1wBLlHZe5sWf0AqjksNdYTbGBEd0UasQMT3SNV15g=="],
+
     "tailwindcss": ["tailwindcss@4.1.17", "", {}, "sha512-j9Ee2YjuQqYT9bbRTfTZht9W/ytp5H+jJpZKiYdP/bpnXARAuELt9ofP0lPnmHjbga7SNQIxdTAXCmtKVYjN+Q=="],
 
     "tapable": ["tapable@2.2.3", "", {}, "sha512-ZL6DDuAlRlLGghwcfmSn9sK3Hr6ArtyudlSAiCqQ6IfE+b+HHbydbYDIG15IfS5do+7XQQBdBiubF/cV2dnDzg=="],
@@ -1304,6 +1314,8 @@
     "tslib": ["tslib@2.8.1", "", {}, "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="],
 
     "tsx": ["tsx@4.20.6", "", { "dependencies": { "esbuild": "~0.25.0", "get-tsconfig": "^4.7.5" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "bin": { "tsx": "dist/cli.mjs" } }, "sha512-ytQKuwgmrrkDTFP4LjR0ToE2nqgy886GpvRSpU0JAnrdBYppuY5rLkRUYPU1yCryb24SsKBTL/hlDQAEFVwtZg=="],
+
+    "tw-animate-css": ["tw-animate-css@1.4.0", "", {}, "sha512-7bziOlRqH0hJx80h/3mbicLW7o8qLsH5+RaLR2t+OHM3D0JlWGODQKQ4cxbK7WlvmUxpcj6Kgu6EKqjrGFe3QQ=="],
 
     "type": ["type@2.7.3", "", {}, "sha512-8j+1QmAbPvLZow5Qpi6NCaN8FB60p/6x8/vfNqOk/hC+HuvFZhL4+WfekuhQLiqFZXOgQdrs3B+XxEmCc6b3FQ=="],
 

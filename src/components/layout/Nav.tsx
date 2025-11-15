@@ -60,6 +60,20 @@ const SettingsIcon: React.FC = () => {
   );
 };
 
+const AdminPanelIcon: React.FC = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      height="24px"
+      viewBox="0 -960 960 960"
+      width="24px"
+      fill="#FFFFFF"
+    >
+      <path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm0-80h640v-400H160v400Zm140-40-56-56 103-104-104-104 57-56 160 160-160 160Zm180 0v-80h240v80H480Z" />
+    </svg>
+  );
+};
+
 const Nav: React.FC = () => {
   const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -72,6 +86,10 @@ const Nav: React.FC = () => {
 
   function settings() {
     router.push('/settings');
+  }
+
+  function adminPanel() {
+    router.push('/settings/admin');
   }
 
   useEffect(() => {
@@ -132,6 +150,16 @@ const Nav: React.FC = () => {
             >
               <SettingsIcon />
               <span>Settings</span>
+            </button>
+            <button
+              onClick={() => {
+                adminPanel();
+                setIsDropdownOpen(false);
+              }}
+              className="w-full cursor-pointer text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2 transition-colors duration-200"
+            >
+              <AdminPanelIcon />
+              <span>Admin Panel</span>
             </button>
             <button
               onClick={() => {
