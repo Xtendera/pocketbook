@@ -15,9 +15,11 @@ import {
 import { MdDelete } from 'react-icons/md';
 import Button from './Button';
 import Modal, { ModalActions } from './Modal';
+import Input from './Input';
 import { InfoIcon } from '../icons';
 import { useState } from 'react';
 import { trpc } from '~/utils/trpc';
+import TooltipToggle from './TooltipToggle';
 
 const permissions = ['Viewer', 'User', 'Admin'];
 
@@ -35,6 +37,11 @@ const UserManPanel: React.FC<UserManPanelProps> = ({ isDemo }) => {
     id: string;
     username: string;
   } | null>(null);
+
+  // New user form state
+  const [newUsername, setNewUsername] = useState<string>('');
+  const [newPermissionLevel, setNewPermissionLevel] = useState<string>('2');
+  const [addPassToggle, setAddPassToggle] = useState<boolean>(false);
 
   const handleDeleteClick = (userId: string, username: string) => {
     setUserToDelete({ id: userId, username });
@@ -159,10 +166,46 @@ const UserManPanel: React.FC<UserManPanelProps> = ({ isDemo }) => {
         </ModalActions>
       </Modal>
       <Modal isOpen={showAddModal} title="Create User">
-        <p className="text-white text-center">Create a new user account</p>
-        <p className="text-gray-400 text-sm text-center">
-          User details can be configured after creation.
-        </p>
+        <div className="w-full space-y-4">
+          <Input
+            label="Username"
+            value={newUsername}
+            onChange={(e) => setNewUsername(e.target.value)}
+            placeholder="Enter username"
+          />
+
+          <div className="w-full">
+            <label className="block text-sm text-gray-400 mb-2">
+              Permission Level
+            </label>
+            <select
+              value={newPermissionLevel}
+              onChange={(e) => setNewPermissionLevel(e.target.value)}
+              className="w-full px-3 py-2 bg-pocket-field border border-pocket-blue rounded-xl outline-none focus:outline-none text-white"
+            >
+              <option value="1">Viewer</option>
+              <option value="2">User</option>
+              <option value="3">Admin</option>
+            </select>
+          </div>
+          <TooltipToggle
+            label="Set Password"
+            checked={addPassToggle}
+            onChange={setAddPassToggle}
+            tooltipMessage="You can either set the password now, or have the user set it using a temporary activation code on first login."
+          />
+          {addPassToggle && (
+            <>
+              <Input
+                label="Password"
+                type="password"
+                placeholder="Enter a new password..."
+              />
+              <Input label="Confirm" type="password" placeholder="Confirm" />
+            </>
+          )}
+        </div>
+
         {isDemo && (
           <span className="text-base ml-1 text-yellow-300 inline-flex items-center gap-1 align-middle">
             <InfoIcon className="text-yellow-300 inline-block shrink-0" />
