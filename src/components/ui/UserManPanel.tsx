@@ -30,6 +30,7 @@ const UserManPanel: React.FC<UserManPanelProps> = ({ isDemo }) => {
   const users = trpc.admin.getUsers.useQuery();
   const { data: currentUser } = trpc.auth.getInfo.useQuery();
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [userToDelete, setUserToDelete] = useState<{
     id: string;
     username: string;
@@ -52,11 +53,19 @@ const UserManPanel: React.FC<UserManPanelProps> = ({ isDemo }) => {
     utils.admin.getUsers.invalidate();
   };
 
+  const handleCancelAdd = () => {
+    setShowAddModal(false);
+  };
+
+  const handleConfirmAdd = () => {
+    utils.admin.getUsers.invalidate();
+  };
+
   return (
     <>
       <Button
         className="mt-4 cursor-pointer"
-        onClick={() => setShowDeleteModal(true)}
+        onClick={() => setShowAddModal(true)}
       >
         Create User
       </Button>
@@ -146,6 +155,35 @@ const UserManPanel: React.FC<UserManPanelProps> = ({ isDemo }) => {
             disabled={isDemo}
           >
             Delete
+          </Button>
+        </ModalActions>
+      </Modal>
+      <Modal isOpen={showAddModal} title="Create User">
+        <p className="text-white text-center">Create a new user account</p>
+        <p className="text-gray-400 text-sm text-center">
+          User details can be configured after creation.
+        </p>
+        {isDemo && (
+          <span className="text-base ml-1 text-yellow-300 inline-flex items-center gap-1 align-middle">
+            <InfoIcon className="text-yellow-300 inline-block shrink-0" />
+            This action cannot be performed in DEMO mode
+          </span>
+        )}
+        <ModalActions>
+          <Button
+            variant="secondary"
+            className="flex-1"
+            onClick={handleCancelAdd}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            className="flex-1"
+            onClick={handleConfirmAdd}
+            disabled={isDemo}
+          >
+            Create
           </Button>
         </ModalActions>
       </Modal>
