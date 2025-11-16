@@ -135,7 +135,7 @@ const BookGrid: React.FC<BookGridProps> = ({
 
       {!selection && (
         <div
-          className={`w-full h-full transition-all duration-400 border-gray-600 hover:border-gray-400 border-dashed border-4 rounded-2xl flex items-center justify-center cursor-pointer group ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`w-full transition-all duration-400 border-gray-600 hover:border-gray-400 border-dashed border-4 rounded-2xl flex items-center justify-center cursor-pointer group ${uploading ? 'opacity-50 cursor-not-allowed' : ''} ${books?.length === 0 ? 'h-72' : 'h-full'}`}
           onClick={uploading ? undefined : handlePlusClick}
         >
           <div
