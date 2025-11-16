@@ -28,6 +28,8 @@
   "dependencies": {
     "@lingo-reader/epub-parser": "^0.4.2",
     "@prisma/client": "^6.19.0",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-tooltip": "^1.2.8",
     "@tanstack/react-query": "^5.90.9",
     "@trpc/client": "npm:@trpc/client",
     "@trpc/next": "npm:@trpc/next",
