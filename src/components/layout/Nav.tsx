@@ -8,11 +8,13 @@ import {
   MdSettings,
   MdAdminPanelSettings,
 } from 'react-icons/md';
+import { trpc } from '~/utils/trpc';
 
 const Nav: React.FC = () => {
   const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { data: userInfo } = trpc.auth.getInfo.useQuery();
 
   function signOut() {
     cookieStore.delete('jwt');
@@ -42,6 +44,8 @@ const Nav: React.FC = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  const isAdmin = userInfo?.permission === 3;
 
   return (
     <div className="flex justify-between">
@@ -88,16 +92,18 @@ const Nav: React.FC = () => {
               <MdSettings size={24} color="#FFFFFF" />
               <span>Settings</span>
             </button>
-            <button
-              onClick={() => {
-                adminPanel();
-                setIsDropdownOpen(false);
-              }}
-              className="w-full cursor-pointer text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2 transition-colors duration-200"
-            >
-              <MdAdminPanelSettings size={24} color="#FFFFFF" />
-              <span>Admin Panel</span>
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => {
+                  adminPanel();
+                  setIsDropdownOpen(false);
+                }}
+                className="w-full cursor-pointer text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2 transition-colors duration-200"
+              >
+                <MdAdminPanelSettings size={24} color="#FFFFFF" />
+                <span>Admin Panel</span>
+              </button>
+            )}
             <button
               onClick={() => {
                 signOut();
