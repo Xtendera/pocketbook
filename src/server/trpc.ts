@@ -11,6 +11,7 @@
 import { TRPCError, initTRPC } from '@trpc/server';
 import { transformer } from '~/utils/transformer';
 import type { Context } from './context';
+import { isAdmin } from '~/utils/auth';
 
 const t = initTRPC.context<Context>().create({
   /**
@@ -46,6 +47,22 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
       message: 'You must be logged in to access this endpoint',
+    });
+  }
+  return next({
+    ctx: {
+      ...ctx,
+      userId: ctx.userId, // Now guaranteed to be defined
+      username: ctx.username,
+    },
+  });
+});
+
+export const adminProcedure = t.procedure.use(async ({ ctx, next }) => {
+  if (!ctx.userId || !(await isAdmin(ctx.userId))) {
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+      message: 'You do not have sufficient permissions to perform this action',
     });
   }
   return next({

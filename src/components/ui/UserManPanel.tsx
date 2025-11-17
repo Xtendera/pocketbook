@@ -42,6 +42,8 @@ const UserManPanel: React.FC<UserManPanelProps> = ({ isDemo }) => {
   const [newUsername, setNewUsername] = useState<string>('');
   const [newPermissionLevel, setNewPermissionLevel] = useState<string>('2');
   const [addPassToggle, setAddPassToggle] = useState<boolean>(false);
+  const [newPass, setNewPass] = useState<string>('');
+  const [newConfirm, setNewConfirm] = useState<string>('');
 
   const handleDeleteClick = (userId: string, username: string) => {
     setUserToDelete({ id: userId, username });
@@ -198,10 +200,18 @@ const UserManPanel: React.FC<UserManPanelProps> = ({ isDemo }) => {
             <>
               <Input
                 label="Password"
+                value={newPass}
+                onChange={(e) => setNewPass(e.target.value)}
                 type="password"
                 placeholder="Enter a new password..."
               />
-              <Input label="Confirm" type="password" placeholder="Confirm" />
+              <Input
+                label="Confirm"
+                value={newConfirm}
+                onChange={(e) => setNewConfirm(e.target.value)}
+                type="password"
+                placeholder="Confirm"
+              />
             </>
           )}
         </div>
