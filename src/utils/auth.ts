@@ -1,6 +1,8 @@
 import { prisma } from '~/server/prisma';
 
-export async function isAdmin(userId: string): Promise<boolean> {
+export async function getPermission(
+  userId: string | undefined,
+): Promise<number> {
   const user = await prisma.user.findUnique({
     select: {
       permission: true,
@@ -9,9 +11,9 @@ export async function isAdmin(userId: string): Promise<boolean> {
       uuid: userId,
     },
   });
-  if (user && user.permission >= 2) {
+  if (user) {
     // Admin (or above for future use, like an owner role)
-    return true;
+    return user.permission;
   }
-  return false;
+  return -1;
 }

@@ -2,6 +2,7 @@ import { adminProcedure, router } from '~/server/trpc';
 import { prisma } from '~/server/prisma';
 import z from 'zod';
 import { hashPassword } from '~/utils/password';
+import { User } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 
 export const adminRouter = router({
@@ -30,8 +31,9 @@ export const adminRouter = router({
       }),
     )
     .mutation(async (req) => {
+      let user: User;
       if (req.input.password) {
-        await prisma.user.create({
+        user = await prisma.user.create({
           data: {
             username: req.input.username,
             passwordHash: await hashPassword(req.input.username),
@@ -39,7 +41,7 @@ export const adminRouter = router({
           },
         });
       } else {
-        await prisma.user.create({
+        user = await prisma.user.create({
           data: {
             username: req.input.username,
             passwordHash: '', // No password for now, will be created on user registration
@@ -48,10 +50,69 @@ export const adminRouter = router({
           },
         });
       }
+      return {
+        newUserId: user.uuid,
+      };
     }),
-  deleteUser: adminProcedure.mutation(() => {
-    throw new TRPCError({
-      code: 'NOT_IMPLEMENTED',
-    });
-  }),
+  deleteUser: adminProcedure
+    .input(z.string().length(36))
+    .mutation(async (req) => {
+      const user = await prisma.user.delete({
+        where: {
+          uuid: req.input,
+        },
+      });
+      if (!user) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Invalid User ID',
+        });
+      }
+    }),
+  changeUserStatus: adminProcedure
+    .input(
+      z.object({
+        userId: z.string().length(36),
+        status: z.int().min(0).max(1), // Disabled or enabled; The "unactivated" status is internal-only
+      }),
+    )
+    .mutation((req) => {
+      const user = prisma.user.update({
+        where: {
+          uuid: req.input.userId,
+        },
+        data: {
+          status: req.input.status,
+        },
+      });
+      if (!user) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Invalid User ID',
+        });
+      }
+    }),
+  changeUserPermission: adminProcedure
+    .input(
+      z.object({
+        userId: z.string().length(36),
+        permission: z.int().min(0).max(2),
+      }),
+    )
+    .mutation((req) => {
+      const user = prisma.user.update({
+        where: {
+          uuid: req.input.userId,
+        },
+        data: {
+          permission: req.input.permission,
+        },
+      });
+      if (!user) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Invalid User ID',
+        });
+      }
+    }),
 });
