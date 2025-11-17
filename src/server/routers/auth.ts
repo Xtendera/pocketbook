@@ -54,7 +54,7 @@ export const authRouter = router({
       return {
         success: false,
         username: '',
-        permission: 0,
+        permission: 1,
       };
     }
     return {

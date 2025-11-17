@@ -26,7 +26,7 @@ export const adminRouter = router({
     .input(
       z.object({
         username: z.string().min(4).max(25),
-        permission: z.int().min(0).max(2),
+        permission: z.int().min(1).max(3),
         password: z.string().min(6).max(25).optional(),
       }),
     )
@@ -96,7 +96,7 @@ export const adminRouter = router({
     .input(
       z.object({
         userId: z.string().length(36),
-        permission: z.int().min(0).max(2),
+        permission: z.int().min(1).max(3),
       }),
     )
     .mutation((req) => {

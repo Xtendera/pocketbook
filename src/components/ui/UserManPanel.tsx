@@ -31,12 +31,12 @@ const UserManPanel: React.FC<UserManPanelProps> = ({ isDemo }) => {
   const utils = trpc.useUtils();
   const users = trpc.admin.getUsers.useQuery();
   const { data: currentUser } = trpc.auth.getInfo.useQuery();
+  const createUser = trpc.admin.createUser.useMutation();
+  const deleteUser = trpc.admin.deleteUser.useMutation();
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
-  const [userToDelete, setUserToDelete] = useState<{
-    id: string;
-    username: string;
-  } | null>(null);
+  const [userIdToDelete, setUserIdToDelete] = useState<string>('');
+  const [usernameToDelete, setUsernameToDelete] = useState<string>('');
 
   // New user form state
   const [newUsername, setNewUsername] = useState<string>('');
@@ -46,28 +46,58 @@ const UserManPanel: React.FC<UserManPanelProps> = ({ isDemo }) => {
   const [newConfirm, setNewConfirm] = useState<string>('');
 
   const handleDeleteClick = (userId: string, username: string) => {
-    setUserToDelete({ id: userId, username });
+    setUserIdToDelete(userId);
+    setUsernameToDelete(username);
     setShowDeleteModal(true);
   };
 
   const handleCancelDelete = () => {
     setShowDeleteModal(false);
-    setUserToDelete(null);
+    setUserIdToDelete('');
+    setUsernameToDelete('');
   };
 
   const handleConfirmDelete = () => {
-    // TODO: Implement delete w/ backend
-
-    // Invalidate the userlist
-    utils.admin.getUsers.invalidate();
+    if (userIdToDelete) {
+      deleteUser.mutate(userIdToDelete, {
+        onSuccess: () => {
+          utils.admin.getUsers.invalidate();
+          setShowDeleteModal(false);
+          setUserIdToDelete('');
+          setUsernameToDelete('');
+        },
+      });
+    }
   };
 
   const handleCancelAdd = () => {
     setShowAddModal(false);
+    setNewUsername('');
+    setNewPermissionLevel('2');
+    setAddPassToggle(false);
+    setNewPass('');
+    setNewConfirm('');
   };
 
   const handleConfirmAdd = () => {
-    utils.admin.getUsers.invalidate();
+    createUser.mutate(
+      {
+        username: newUsername,
+        permission: parseInt(newPermissionLevel),
+        password: addPassToggle ? newPass : undefined,
+      },
+      {
+        onSuccess: () => {
+          utils.admin.getUsers.invalidate();
+          setShowAddModal(false);
+          setNewUsername('');
+          setNewPermissionLevel('2');
+          setAddPassToggle(false);
+          setNewPass('');
+          setNewConfirm('');
+        },
+      },
+    );
   };
 
   return (
@@ -137,18 +167,18 @@ const UserManPanel: React.FC<UserManPanelProps> = ({ isDemo }) => {
       <Modal isOpen={showDeleteModal} title="Confirm Delete">
         <p className="text-white text-center">
           Are you sure you want to delete user{' '}
-          <span className="font-bold text-pocket-blue">
-            {userToDelete?.username}
-          </span>
+          <span className="font-bold text-pocket-blue">{usernameToDelete}</span>
           ?
         </p>
         <p className="text-gray-400 text-sm text-center">
           This action cannot be undone.
         </p>
-        <span className="text-base ml-1 text-yellow-300 inline-flex items-center gap-1 align-middle">
-          <InfoIcon className="text-yellow-300 inline-block shrink-0" />
-          This action cannot be performed in DEMO mode
-        </span>
+        {isDemo && (
+          <span className="text-base ml-1 text-yellow-300 inline-flex items-center gap-1 align-middle">
+            <InfoIcon className="text-yellow-300 inline-block shrink-0" />
+            This action cannot be performed in DEMO mode
+          </span>
+        )}
         <ModalActions>
           <Button
             variant="secondary"

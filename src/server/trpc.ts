@@ -60,7 +60,7 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 
 export const adminProcedure = t.procedure.use(async ({ ctx, next }) => {
   const userPermission = await getPermission(ctx.userId);
-  if (userPermission < 2) {
+  if (userPermission < 3) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
       message: 'You do not have sufficient permissions to perform this action',
