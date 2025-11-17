@@ -2,7 +2,12 @@
 
 A small ebook reader for on-the-go. Made to support multiple users with both shared and private ebooks/collections.
 
-# Setup
+## Demo
+
+https://github.com/user-attachments/assets/884721a9-b494-4597-b3da-e2978706333a
+
+
+## Setup
 
 This project requires a Postgres-compatible database running at a URL specified in the .env file. You should also have a randomly generated JWT key that is 64 bytes long. DEMO mode can be enabled if running in that environment.
 
