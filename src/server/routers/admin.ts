@@ -4,6 +4,7 @@ import z from 'zod';
 import { hashPassword } from '~/utils/password';
 import { User } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
+import { randomUUID } from 'crypto';
 
 export const adminRouter = router({
   getUsers: adminProcedure.query(async () => {
@@ -45,6 +46,7 @@ export const adminRouter = router({
           data: {
             username: req.input.username,
             passwordHash: '', // No password for now, will be created on user registration
+            activationToken: randomUUID(),
             permission: req.input.permission,
             status: 2, // Unactivated
           },

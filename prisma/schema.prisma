@@ -24,6 +24,7 @@ model User {
   username        String         @unique
   passwordHash    String
   status          Int            @default(0) // 0 = active, 1 = disabled, 2 = unactivated
+  activationToken String         @default("")
   permission      Int // 1 = viewer, 2 = user, 3 = admin
   accessibleBooks Book[]         @relation("BookAccess")
   bookProgress    BookProgress[]
