@@ -11,6 +11,7 @@
 import { TRPCError, initTRPC } from '@trpc/server';
 import { transformer } from '~/utils/transformer';
 import type { Context } from './context';
+import { getPermission } from '~/utils/auth';
 
 const t = initTRPC.context<Context>().create({
   /**
@@ -53,6 +54,24 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
       ...ctx,
       userId: ctx.userId, // Now guaranteed to be defined
       username: ctx.username,
+    },
+  });
+});
+
+export const adminProcedure = t.procedure.use(async ({ ctx, next }) => {
+  const userPermission = await getPermission(ctx.userId);
+  if (userPermission < 3) {
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+      message: 'You do not have sufficient permissions to perform this action',
+    });
+  }
+  return next({
+    ctx: {
+      ...ctx,
+      userId: ctx.userId, // Now guaranteed to be defined
+      username: ctx.username,
+      permission: userPermission,
     },
   });
 });

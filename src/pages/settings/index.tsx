@@ -73,7 +73,7 @@ const SettingsPage: NextPageWithLayout<SettingsPageProps> = ({ config }) => {
           </Button>
           {config.isDemoMode ? (
             <span className="text-base ml-1 text-yellow-300 inline-flex items-center gap-1 align-middle">
-              <InfoIcon className="text-yellow-300 inline-block flex-shrink-0" />
+              <InfoIcon className="text-yellow-300 inline-block shrink-0" />
               Cannot reset password in DEMO mode
             </span>
           ) : (
