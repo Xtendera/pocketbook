@@ -124,7 +124,10 @@ export default async function handler(
             let book;
 
             // Check if we should use Vercel Blob storage
-            if (process.env.BLOB_READ_WRITE_TOKEN) {
+            if (
+              process.env.BLOB_READ_WRITE_TOKEN !=
+              'vercel_blob_rw_OPTIONAL_NOT_NEEDED'
+            ) {
               // Generate UUID for the book first
               const bookUuid = randomUUID();
               const fileBuffer = await fs.readFile(file.filepath);
@@ -191,7 +194,9 @@ export default async function handler(
               }
 
               const newFilepath = path.join(UPLOAD_DIR, `${book.uuid}.epub`);
-              await fs.rename(file.filepath, newFilepath);
+              // Use copyFile + unlink instead of rename to handle cross-device moves
+              await fs.copyFile(file.filepath, newFilepath);
+              await fs.unlink(file.filepath);
 
               uploadedBooks.push({
                 uuid: book.uuid,
