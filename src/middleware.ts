@@ -29,7 +29,9 @@ export async function middleware(request: NextRequest) {
 
   if (
     request.nextUrl.pathname === '/login' ||
-    request.nextUrl.pathname.startsWith('/login/')
+    request.nextUrl.pathname.startsWith('/login/') ||
+    request.nextUrl.pathname === '/register' ||
+    request.nextUrl.pathname.startsWith('/register/')
   ) {
     if (authResult.isValid)
       return NextResponse.redirect(new URL('/', request.url));
